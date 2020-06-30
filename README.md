@@ -22,4 +22,4 @@ Ferramenta que permite editar arquivos da franquia Yu-Gi-Oh! de PSP e Nintendo D
 * Huffman TAGFORCE
 * GZIP
 ### Textos
-.* .bin(TAG FORCE)
+* .bin(TAG FORCE)
