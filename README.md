@@ -18,6 +18,8 @@ Ferramenta que permite editar arquivos da franquia Yu-Gi-Oh! de PSP e Nintendo D
 * .EHP
 ### Imagens:
 * .GIM [GIMSHARP](https://github.com/nickworonekin/puyotools/tree/master/src/GimSharp)
-### Compressão
+### Compressões
 * Huffman TAGFORCE
 * GZIP
+### Textos
+.* .bin(TAG FORCE)
