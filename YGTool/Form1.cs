@@ -22,13 +22,17 @@ namespace YGTool
         public Form1()
         {
             InitializeComponent();
-            // List<string> arquivosNecessariosComprimir = ArquivosNecessarios("cardinfo_eng");
+           
             // Huffman yugiohHuffman = new Huffman();
             // yugiohHuffman.Descomprimir(arquivosNecessariosComprimir[0], arquivosNecessariosComprimir[1], arquivosNecessariosComprimir[2]);
             //yugiohHuffman.Comprimir(arquivosNecessariosComprimir[0], arquivosNecessariosComprimir[1], arquivosNecessariosComprimir[2]);
-            TagForceTextos tft = new TagForceTextos();
-            tft.ExportarParaTxtPonteirosInternos("04_message_res.bin");
-           
+
+            //TagForceTextos tf = new TagForceTextos();
+           // tf.ExportarParaTxtPonteirosExternos("DLG_Text_E.bin", "DLG_Indx_E.bin",4,0);
+
+           // tf.ExportarCartasParaTxt();
+
+
 
         }
 
@@ -158,27 +162,7 @@ namespace YGTool
             }
         }
 
-        private List<string> ArquivosNecessarios(string diretorio)
-        {
-            string[] arquivosParaComprimir = new string[] { "CARD_Desc", "CARD_Indx", "CARD_Huff" };
-            string[] arquivosDaPasta = Directory.GetFiles(diretorio);
-            List<string> arquivosVerificados = new List<string>();
-
-            for (int i = 0; i < arquivosDaPasta.Length; i++)
-            {
-                for (int y = 0; y < arquivosParaComprimir.Length; y++)
-                {
-                    if (arquivosDaPasta[i].Contains(arquivosParaComprimir[y]))
-                    {
-                        arquivosVerificados.Add(arquivosDaPasta[i]);
-                        break;
-                    }
-                }
-                
-            }
-
-            return arquivosVerificados;
-        }
+        
 
         private void comprimirToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -212,9 +196,13 @@ namespace YGTool
             }
         }
 
-        private void poneirosInternosToolStripMenuItem_Click(object sender, EventArgs e)
-        {          
+        private void ajudaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(this, "YGTool por Matheus Abreu\n Github: https://github.com/matheuscardoso96/YGTool", "Informação", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
+        private void únicoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             try
             {
                 using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -235,12 +223,171 @@ namespace YGTool
 
                 MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            
         }
 
-        private void ponteirosExternosToolStripMenuItem_Click(object sender, EventArgs e)
+        private void emLoteToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            string binarioAtual = string.Empty;
 
+            try
+            {
+                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                {
+                    commonOpenFile.Title = "Selecione uma pasta";
+                    commonOpenFile.IsFolderPicker = true;
+
+                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
+                    {
+                        TagForceTextos tft = new TagForceTextos();
+                        
+                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.bin");
+
+
+                        foreach (var diretorioArquivo in arquivos)
+                        {
+                            binarioAtual = diretorioArquivo;
+                            tft.ExportarParaTxtPonteirosInternos(diretorioArquivo);
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string nomeArquivo = Path.GetFileName(binarioAtual);
+                MessageBox.Show(this, "Binario: \"" + nomeArquivo + "\" incompatível.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void únicoToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                {
+
+                    openFileDialog.Filter = "Arquivos bin (*.bin)|*.bin|Todos os Arquivos (*.*)|*.*";
+
+
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        TagForceTextos tft = new TagForceTextos();
+                        tft.ExportarParaTxtPonteirosInternosDiretos(openFileDialog.FileName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void loteeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string binarioAtual = string.Empty;
+
+            try
+            {
+                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                {
+                    commonOpenFile.Title = "Selecione uma pasta";
+                    commonOpenFile.IsFolderPicker = true;
+
+                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
+                    {
+                        TagForceTextos tft = new TagForceTextos();
+
+                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.bin");
+
+
+                        foreach (var diretorioArquivo in arquivos)
+                        {
+                            binarioAtual = diretorioArquivo;
+                            tft.ExportarParaTxtPonteirosInternosDiretos(diretorioArquivo);
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string nomeArquivo = Path.GetFileName(binarioAtual);
+                MessageBox.Show(this, "Binario: \"" + nomeArquivo + "\" incompatível.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void únicoToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                {
+                    commonOpenFile.Title = "Selecione uma pasta";
+                    commonOpenFile.Multiselect = true;
+
+                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
+                    {
+                        List<string> arquivos = commonOpenFile.FileNames.ToList();
+                        TagForceTextos tf = new TagForceTextos();
+                        tf.ExportarParaTxtPonteirosExternos(arquivos[1],arquivos[0],4, 0, true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void únicoToolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            
+
+            try
+            {
+                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                {
+                    commonOpenFile.Title = "Selecione uma pasta";
+                    commonOpenFile.IsFolderPicker = true;
+
+                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
+                    {
+                        TagForceTextos tf = new TagForceTextos();
+                        tf.ExportarCartasParaTxt(commonOpenFile.FileName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void dLGToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                {
+                    commonOpenFile.Title = "Selecione uma pasta";
+                    commonOpenFile.Multiselect = true;
+
+                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
+                    {
+                        List<string> arquivos = commonOpenFile.FileNames.ToList();
+                        TagForceTextos tf = new TagForceTextos();
+                        tf.ExportarParaTxtPonteirosExternos(arquivos[1], arquivos[0], 4, 0, false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

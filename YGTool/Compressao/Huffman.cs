@@ -10,7 +10,7 @@ namespace YGTool.Compressao
     public class Huffman
     {
 
-        public void Descomprimir(string dirDescricao, string dirCardHuff, string dirCardIndx)
+        public List<short> Descomprimir(string dirDescricao, string dirCardHuff, string dirCardIndx)
         {
             Stream descricao = new MemoryStream(File.ReadAllBytes(dirDescricao));
             Stream cardIndx = new MemoryStream(File.ReadAllBytes(dirCardIndx));
@@ -98,16 +98,9 @@ namespace YGTool.Compressao
                     }
                 }
 
-                byte[] descomprimido = new byte[bufferTotal.Count];
-                File.WriteAllBytes(dirDescricao, descomprimido);
-                using (BinaryWriter bw = new BinaryWriter(File.Open(dirDescricao, FileMode.Open)))
-                {
-                    foreach (var item in bufferTotal)
-                    {
-                        bw.Write(item);
-                    }
-                }
+                
 
+                return bufferTotal;
 
             }
 
@@ -139,7 +132,7 @@ namespace YGTool.Compressao
             }
         }
 
-        public List<No> ObtenhaNos(string diretorioCardDesc)
+        private List<No> ObtenhaNos(string diretorioCardDesc)
         {
             List<char> caracteresDoArquivo = ObtenhaCaracteresDoArquivo(diretorioCardDesc);
 
@@ -155,7 +148,7 @@ namespace YGTool.Compressao
             return frequenciaNos;
         }
 
-        public List<char> ObtenhaCaracteresDoArquivo(string diretorioCardDesc)
+        private List<char> ObtenhaCaracteresDoArquivo(string diretorioCardDesc)
         {
             Stream cardDesc = new MemoryStream(File.ReadAllBytes(diretorioCardDesc));
 
@@ -172,7 +165,7 @@ namespace YGTool.Compressao
             return caracteresDoArquivo;
         }
 
-        public List<No> CrieArvore(List<No> tabelaDeNosOrdenada)
+        private List<No> CrieArvore(List<No> tabelaDeNosOrdenada)
         {
             while (tabelaDeNosOrdenada.Count > 1)
             {
@@ -189,12 +182,12 @@ namespace YGTool.Compressao
             return tabelaDeNosOrdenada;
         }
 
-        public List<No> RemovaNoNuloDaLista(List<No> tabelaDeNosOrdenada)
+        private List<No> RemovaNoNuloDaLista(List<No> tabelaDeNosOrdenada)
         {
             return tabelaDeNosOrdenada.Where(no => no != null).OrderBy(no => no.Frequencia).ToList();
         }
 
-        public Dictionary<char, string> ObtenhaTabelaDeCodigos(No noRaiz)
+        private Dictionary<char, string> ObtenhaTabelaDeCodigos(No noRaiz)
         {
             var tabela = new Dictionary<char, string>();
 
@@ -216,7 +209,7 @@ namespace YGTool.Compressao
 
         }
 
-        public void CrieArvoreNoFormatoDoJogo(Dictionary<char, string> tabela, string dirCardHuff)
+        private void CrieArvoreNoFormatoDoJogo(Dictionary<char, string> tabela, string dirCardHuff)
         {
 
             byte[] bufferNovaArvore = new byte[0x500];
@@ -293,7 +286,7 @@ namespace YGTool.Compressao
             // bool resultadoTeste = TestarAvoreNova(arvoreFinal, caminho, '$');
         }
 
-        public short VerificarSeTemvalorEscrito(Stream huff, int offset)
+        private short VerificarSeTemvalorEscrito(Stream huff, int offset)
         {
             short resultado = 0;
 
