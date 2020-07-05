@@ -22,17 +22,6 @@ namespace YGTool
         public Form1()
         {
             InitializeComponent();
-           
-            // Huffman yugiohHuffman = new Huffman();
-            // yugiohHuffman.Descomprimir(arquivosNecessariosComprimir[0], arquivosNecessariosComprimir[1], arquivosNecessariosComprimir[2]);
-            //yugiohHuffman.Comprimir(arquivosNecessariosComprimir[0], arquivosNecessariosComprimir[1], arquivosNecessariosComprimir[2]);
-
-            //TagForceTextos tf = new TagForceTextos();
-           // tf.ExportarParaTxtPonteirosExternos("DLG_Text_E.bin", "DLG_Indx_E.bin",4,0);
-
-           // tf.ExportarCartasParaTxt();
-
-
 
         }
 
@@ -160,9 +149,7 @@ namespace YGTool
 
                 MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        
+        }        
 
         private void comprimirToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -214,7 +201,7 @@ namespace YGTool
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
                         TagForceTextos tft = new TagForceTextos();
-                        tft.ExportarParaTxtPonteirosInternos(openFileDialog.FileName);
+                        tft.ExportarParaTxtPonteirosInternosIndiretos(openFileDialog.FileName);
                     }
                 }
             }
@@ -246,7 +233,7 @@ namespace YGTool
                         foreach (var diretorioArquivo in arquivos)
                         {
                             binarioAtual = diretorioArquivo;
-                            tft.ExportarParaTxtPonteirosInternos(diretorioArquivo);
+                            tft.ExportarParaTxtPonteirosInternosIndiretos(diretorioArquivo);
                         }
                     }
                 }
@@ -319,6 +306,8 @@ namespace YGTool
 
         private void únicoToolStripMenuItem2_Click(object sender, EventArgs e)
         {
+            MessageBox.Show(this, "Selecione os arquivos na seguinte ordem com Ctrl:\n1º Binário da tabela de ponteiros\n2º Binário contendo os textos", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
             try
             {
                 using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
@@ -343,7 +332,7 @@ namespace YGTool
 
         private void únicoToolStripMenuItem3_Click(object sender, EventArgs e)
         {
-            
+            MessageBox.Show(this, "Selecione a pasta contendo os arquivos do CardInfo.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             try
             {
@@ -368,6 +357,7 @@ namespace YGTool
 
         private void dLGToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            MessageBox.Show(this, "Selecione os arquivos na seguinte ordem com Ctrl:\n1º Binário da tabela de ponteiros\n2º Binário contendo os textos", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
             try
             {
                 using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
@@ -380,6 +370,30 @@ namespace YGTool
                         List<string> arquivos = commonOpenFile.FileNames.ToList();
                         TagForceTextos tf = new TagForceTextos();
                         tf.ExportarParaTxtPonteirosExternos(arquivos[1], arquivos[0], 4, 0, false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void importarTextosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                {
+
+                    openFileDialog.Filter = "Arquivos txt (*.txt)|*.txt|Todos os Arquivos (*.*)|*.*";
+
+
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {                       
+                        TagForceTextos tf = new TagForceTextos();
+                        tf.ImportarTexto(openFileDialog.FileName);
                     }
                 }
             }

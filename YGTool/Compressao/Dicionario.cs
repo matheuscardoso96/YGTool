@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace YGTool.Compressao
 {
@@ -202,6 +203,169 @@ namespace YGTool.Compressao
 
             return true;
 
+        }
+
+        public string CriarUmDicionario(string texto, string dirDict)
+        {                                                     
+            List<Termo> termosFinais = new List<Termo>();                                  
+            List<Termo> termos = ObtenhaTermosMaisUsados(texto);
+            List<Termo> termosNaoDuplicados = RemovaDuplicatas(termos);
+            termosNaoDuplicados.Sort();
+            termosFinais = termosNaoDuplicados.Take(1000).ToList();
+            Dictionary<string, string> dicionarioTermosFinal = new Dictionary<string, string>();
+            return ConverterComDicionario(dicionarioTermosFinal, texto);
+        }
+
+        public Dictionary<string, string> CriarNovoDict(string dirDict, List<Termo> termosFinais)
+        {
+            Dictionary<string, string> dicionarioTermosFinal = new Dictionary<string, string>();
+            int tamanhoHeader = 0xC;
+            int contador = 0;
+            int quatidadeDeTermos = 1000;
+            int ponteiro = 0;
+            byte[] tabelaDePonteiros = new byte[(quatidadeDeTermos * 4) + tamanhoHeader + 4];
+            List<byte[]> termosEmbyte = new List<byte[]>();
+            MemoryStream tabela = new MemoryStream(tabelaDePonteiros);
+            MemoryStream tabelaFinal = new MemoryStream();
+            using (BinaryWriter bw = new BinaryWriter(tabela))
+            {
+                bw.Write((int)termosFinais.Count());
+                bw.Write(tamanhoHeader);
+                bw.Write(tabelaDePonteiros.Length);
+                contador = 0;
+
+                foreach (var termo in termosFinais)
+                {
+                    bw.Write(ponteiro);
+                    string termoo = termo.Texto + "\0";
+                    byte[] termoEmbyte = Encoding.Unicode.GetBytes(termoo);
+                    termosEmbyte.Add(termoEmbyte);
+                    string id = contador.ToString().PadLeft(3, '0');
+                    dicionarioTermosFinal.Add("$d" + id, termoo);
+                    ponteiro += termoEmbyte.Length;
+                    contador++;
+
+
+                }
+
+                bw.BaseStream.Position = 0;
+                tabela.CopyTo(tabelaFinal);
+            }
+
+            byte[] arquivoFinal = new byte[tabelaDePonteiros.Length + ponteiro];
+            MemoryStream final = new MemoryStream(arquivoFinal);
+
+            using (BinaryWriter bw = new BinaryWriter(final))
+            {
+                bw.Write(tabelaFinal.ToArray());
+
+                foreach (var item in termosEmbyte)
+                {
+                    bw.Write(item);
+                }
+
+                Array.Copy(final.ToArray(), arquivoFinal, final.Length);
+            }
+
+            File.WriteAllBytes(dirDict, arquivoFinal.ToArray());
+
+            return dicionarioTermosFinal;
+        }
+
+        public string ConverterComDicionario(Dictionary<string, string> dicionario, string texto)
+        {
+            foreach (var termo in dicionario)
+            {
+                texto = texto.Replace(termo.Value.Replace("\0", ""), termo.Key);
+            }
+            return texto;
+        }
+
+        public List<Termo> ObtenhaTermosMaisUsados(string texto)
+        {
+            List<Termo> termos = new List<Termo>();
+            int ocorrencias = 0;
+            string[] frases = texto.Split(new[] { "\0" }, StringSplitOptions.RemoveEmptyEntries).ToArray();
+
+            foreach (string frase in frases)
+            {
+                string parteDaFrase = "";
+                int contaEspaco = 0;
+
+                for (int i = 0; i < frase.Length; i++)
+                {
+                    parteDaFrase += frase[i];
+
+                    if (frase[i] == ' ')
+                        contaEspaco += 1;
+
+                    if (contaEspaco == 2)
+                    {
+                        parteDaFrase = Regex.Escape(parteDaFrase);
+                        ocorrencias = Regex.Matches(texto,parteDaFrase).Count;
+                        parteDaFrase = Regex.Unescape(parteDaFrase);
+
+                        if (ocorrencias > 2)
+                        {                            
+                            termos.Add(new Termo(ocorrencias, parteDaFrase));
+                            contaEspaco = 0;
+                            parteDaFrase = string.Empty;
+                        }
+                        else
+                            contaEspaco = 1;
+
+
+                    }
+                }
+            }
+
+            return termos;
+        }
+
+        public List<Termo> RemovaDuplicatas(List<Termo> termos)
+        {
+            List<Termo> naoDuplicados = new List<Termo>();
+
+            foreach (var termo in termos)
+            {
+                bool existe = naoDuplicados.Any(x => x.Texto.Contains(termo.Texto));
+
+                if (!existe)
+                {
+                    naoDuplicados.Add(termo);
+                }
+            }
+
+            return naoDuplicados;
+        }
+        
+    }
+
+    public class Termo: IComparable<Termo>
+    {
+        public int Quatidade { get; set; }
+        public string Texto { get; set; }
+
+        public Termo(int quatidade, string texto)
+        {
+            Quatidade = quatidade;
+            Texto = texto;
+        }
+
+        public int CompareTo(Termo other)
+        {
+            if (Quatidade > other.Quatidade)
+            {
+                return -1;
+            }
+            else if (Quatidade < other.Quatidade)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

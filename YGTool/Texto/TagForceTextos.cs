@@ -10,7 +10,7 @@ namespace YGTool.Texto
 {
     public class TagForceTextos
     {
-        public void ExportarParaTxtPonteirosInternos(string dirTextoBin)
+        public void ExportarParaTxtPonteirosInternosIndiretos(string dirTextoBin)
         {
             int quantidaDePonteiros = 0;
             int tamanhoDoHeader = 0;
@@ -21,7 +21,7 @@ namespace YGTool.Texto
             int somaPonteiro = 0;
 
             Stream bin = new MemoryStream(File.ReadAllBytes(dirTextoBin));
-            textos.Add("<Tipo de Ponteiro: Interno Indireto>\n\n");
+            textos.Add("<Tipo de Ponteiro = Interno Indireto>\n\n");
 
 
 
@@ -94,10 +94,10 @@ namespace YGTool.Texto
                     }
 
                     br.BaseStream.Seek(ponteiro, SeekOrigin.Begin);
-                    byte[] textoEmUnicode = br.ReadBytes(tamanhoTexto - 2);
+                    byte[] textoEmUnicode = br.ReadBytes(tamanhoTexto);
 
                     var textoEmString = Encoding.Unicode.GetString(textoEmUnicode);
-                    textos.Add("<" + "PONTEIRO: " + posicaoTabela + "," + somaPonteiro + ">\n" + "<TEXTO>" + textoEmString.Replace("$CA", "<COR: $CA>").Replace("$C0", "<COR: $C0>").Replace("$C5", "<COR: $C5>").Replace("$C8", "<COR: $C8>").Replace("\n", "<b>\n").Replace("$0", "<JOGADOR: $0>") + "<TEXTO/>\n" + "<FIM/>\n\n");
+                    textos.Add("<" + "PONTEIRO: " + posicaoTabela + "," + somaPonteiro + ">\n" + "<TEXTO>" + textoEmString.Replace("$CA", "<COR: $CA>").Replace("$C0", "<COR: $C0>").Replace("$C5", "<COR: $C5>").Replace("$C8", "<COR: $C8>").Replace("\n", "<b>\n").Replace("$0", "<JOGADOR: $0>").Replace("\0", "<NULL>") + "<TEXTO/>\n" + "<FIM/>\n\n");
                     posicaoTabela += 4;
                     somaPonteiro = 0;
                 }
@@ -118,7 +118,7 @@ namespace YGTool.Texto
 
             Stream bin = new MemoryStream(File.ReadAllBytes(dirTextoBin));
 
-
+            textos.Add("<Tipo de Ponteiro = Interno direto>\n\n");
 
             using (BinaryReader br = new BinaryReader(bin))
             {
@@ -138,7 +138,7 @@ namespace YGTool.Texto
                     byte[] textoEmUnicode = br.ReadBytes(tamanhoTexto);
 
                     var textoEmString = Encoding.Unicode.GetString(textoEmUnicode);
-                    textos.Add("<" + "PONTEIRO: " + posicaoTabela + "," + somaPonteiro + ">\n" + "<TEXTO>" + textoEmString.Replace("\0", "").Replace("@2", "<Cor: @2>").Replace("@0", "<Cor: @0>").Replace("\n", "<b>\n") + "<TEXTO/>\n" + "<FIM/>\n\n");
+                    textos.Add("<" + "PONTEIRO: " + posicaoTabela + "," + somaPonteiro + ">\n" + "<TEXTO>" + textoEmString.Replace("\0", "<NULL>").Replace("@2", "<Cor: @2>").Replace("@0", "<Cor: @0>").Replace("\n", "<b>\n") + "<TEXTO/>\n" + "<FIM/>\n\n");
                     posicaoTabela += 8;
                     somaPonteiro = 0;
                 }
@@ -165,11 +165,11 @@ namespace YGTool.Texto
 
             if (mutiplica)
             {
-                textos.Add("<Tipo de Ponteiro: ExternosX2 =" + Path.GetFileName(dirIdx) + ">");
+                textos.Add("<Tipo de Ponteiro = ExternosX2 =" + Path.GetFileName(dirIdx) + ">");
             }
            else
             {
-                textos.Add("<Tipo de Ponteiro: ExternosX1 =" + Path.GetFileName(dirIdx) + ">");
+                textos.Add("<Tipo de Ponteiro = ExternosX1 =" + Path.GetFileName(dirIdx) + ">");
             }
             
 
@@ -229,6 +229,7 @@ namespace YGTool.Texto
                         .Replace("$C3", "<COR: $C3>")
                         .Replace("$C5", "<COR: $C5>")
                         .Replace("$C8", "<COR: $C8>")
+                        .Replace("\r", "<r>")
                         .Replace("\n", "<b>\n").Replace("$0", "<JOGADOR: $0>")
                         .Replace("\0", "<NULL>") + "<TEXTO/>\n" + "<FIM/>\n\n");
                     posicaoTabela += 8;
@@ -259,9 +260,11 @@ namespace YGTool.Texto
             byte[] descdescomprimida = conversorDeCodigos.TranduzirComDicionario(Dict,cardIdx, descomp, cardIntID,cardName);
             string[] tex = ConvertaDescricaoParaString(descdescomprimida).Replace("\0", "<NULL>\0").Split('\0');
 
+           
+
             foreach (var textoo in tex)
             {
-                descricaoTexto.Add("<DESCRICAO>" + textoo + "<DESCRICAO/>\n\n");
+                descricaoTexto.Add("<DESCRICAO>" + textoo + "<DESCRICAO/><FIM/>\n\n");
             }
 
             int quantidaDePonteiros = 0;
@@ -332,17 +335,19 @@ namespace YGTool.Texto
 
             List<string> textosCartaFinal = new List<string>();
 
+            textosCartaFinal.Add("<Tipo de Ponteiro = Informação de Cartas = " + Path.GetFileName(cardIdx) + " = " + Path.GetFileName(Dict) + ">");
+
             for (int i = 0; i < descricaoTexto.Count - 1; i++)
             {
                 textosCartaFinal.Add(textos[i] + descricaoTexto[i]);
             }
 
-            File.WriteAllLines(cardIdx.Replace(".bin", ".txt"), textosCartaFinal);
+            File.WriteAllLines(cardDesc.Replace(".bin", ".txt"), textosCartaFinal);
         }
 
         private List<string> ArquivosNecessarios(string diretorio)
         {
-            List<string> arquivosParaComprimir = new List<string> { "CARD_Name", "CARD_Desc", "CARD_Indx", "CARD_Huff", "DICT_E" , "CARD_IntID" };
+            List<string> arquivosParaComprimir = new List<string> { "CARD_Name", "CARD_Desc", "CARD_Indx", "CARD_Huff", "DICT" , "CARD_IntID" };
             string[] arquivosDaPasta = Directory.GetFiles(diretorio);
             List<string> arquivosVerificados = new List<string>();
 
@@ -383,6 +388,434 @@ namespace YGTool.Texto
             var textao = Encoding.Unicode.GetString(textoDescomprimido);
 
             return textao;
+        }
+
+        public void ImportarTexto(string fileName)
+        {
+            string obterTipoDeTexto = File.ReadAllText(fileName);
+
+            if (obterTipoDeTexto.Contains("Interno Indireto"))
+            {
+                InsiraInternoIndireto(obterTipoDeTexto, fileName);
+            }
+            else if(obterTipoDeTexto.Contains("Interno direto"))
+            {
+                InsiraInternoDireto(obterTipoDeTexto, fileName);
+            }
+            else if (obterTipoDeTexto.Contains("Externos"))
+            {
+                InsiraExternos(obterTipoDeTexto, fileName);
+            }
+            else if (obterTipoDeTexto.Contains("Informação de Cartas"))
+            {
+                InsiraInformacoesDeCartas(obterTipoDeTexto, fileName);
+            }
+
+        }
+
+        private void InsiraInformacoesDeCartas(string texto, string nomeArquivo)
+        {
+            int tamanhoDoHeader = 0;
+            int tamanhoDaTabela = 0;
+            int posicaoTabela = 0;
+            int ponteiro = 0;
+            string idx = "";
+            string dicte = "";
+            string[] dividirTexto = texto.Replace("\r", "").Replace("\n", "").Split(new[] { "<FIM/>" }, StringSplitOptions.RemoveEmptyEntries);
+            string[] informacoesTabela = ObtenhaTipoDePonteiro(dividirTexto.First()).Split(',');
+            idx = informacoesTabela[1];
+            dicte = informacoesTabela[2];
+            Dicionario dicionario = new Dicionario();
+            idx = Path.GetDirectoryName(nomeArquivo) + "\\" + idx;
+            dicte = Path.GetDirectoryName(nomeArquivo) + "\\" + dicte;
+            Stream bin = new MemoryStream(File.ReadAllBytes(idx));
+            Stream backupTabela = new MemoryStream();
+            List<byte[]> arquivoEmbytes = new List<byte[]>();
+            tamanhoDaTabela = (int)bin.Length;
+
+            using (BinaryReader br = new BinaryReader(bin))
+            {
+
+                byte[] tabela = br.ReadBytes(tamanhoDaTabela);
+                backupTabela = new MemoryStream(tabela);
+
+            }
+
+            posicaoTabela = tamanhoDoHeader;
+            MemoryStream tabelaNova = new MemoryStream();
+
+            byte[] padding = new byte[4];
+            arquivoEmbytes.Add(padding);
+
+            StringBuilder descricaoDescomprimida = new StringBuilder();
+
+            using (BinaryWriter bw = new BinaryWriter(backupTabela))
+            {
+                int tamanhoTotal = 0;
+                tamanhoTotal = 4;
+                ponteiro = 4;
+
+                foreach (var item in dividirTexto)
+                {
+                    string[] textoSplit = item.Replace("<b>", "\n").Split(new[] { "<NOME>" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    int[] infoPoint = ObtenhaInformacaoDoPonteiro(textoSplit[0]);
+                    posicaoTabela = infoPoint[0];
+                    bw.BaseStream.Seek(posicaoTabela, SeekOrigin.Begin);
+                    bw.Write(ponteiro + infoPoint[1]);
+
+                    string[] nome = textoSplit[1].Split(new[] { "<NOME/>" }, StringSplitOptions.RemoveEmptyEntries);
+                    string textoQueSeraConvertido = RemovaTagsDoTexto(nome[0]);
+                    string textoDescricao = RemovaTagsDoTexto(nome[1].Replace("<DESCRICAO>", "").Replace("<DESCRICAO/>", ""));
+                    descricaoDescomprimida.Append(textoDescricao);
+                    byte[] textoEmbytes = Encoding.Unicode.GetBytes(textoQueSeraConvertido);
+                    arquivoEmbytes.Add(textoEmbytes);
+                    tamanhoTotal += textoEmbytes.Length;
+                    ponteiro = tamanhoTotal;
+
+                }
+
+               
+                bw.BaseStream.Position = 0;
+                backupTabela.CopyTo(tabelaNova);
+            }
+
+            byte[] textoFinalEmByte = new byte[ponteiro];
+
+            string descricaoComdicionario = dicionario.CriarUmDicionario(descricaoDescomprimida.ToString(), dicte);
+
+            MemoryStream textoFinal = new MemoryStream(textoFinalEmByte);
+
+            using (BinaryWriter bw = new BinaryWriter(textoFinal))
+            {
+
+                foreach (var item in arquivoEmbytes)
+                {
+                    bw.Write(item);
+                }
+
+                textoFinalEmByte = textoFinal.ToArray();
+            }
+
+            File.WriteAllBytes(nomeArquivo.Replace(".txt", ".bin").Replace("CARD_Desc", "CARD_Name"), textoFinalEmByte);
+
+            File.WriteAllBytes(idx, tabelaNova.ToArray());
+
+            File.WriteAllBytes(nomeArquivo.Replace(".txt", ".bin"), Encoding.Unicode.GetBytes(descricaoComdicionario));
+
+            Comprima(nomeArquivo.Replace(".txt", ".bin"), nomeArquivo.Replace(".txt", ".bin").Replace("CARD_Desc", "CARD_Huff"), idx);
+
+        }
+
+        private void InsiraExternos(string texto, string nomeArquivo)
+        {
+            int quantidaDePonteiros = 0;
+            int tamanhoDoHeader = 0;
+            int tamanhoDaTabela = 0;
+            int posicaoTabela = 0;
+            int ponteiro = 0;
+            int metade = 0;
+            string idx = "";
+            string[] dividirTexto = texto.Replace("\r", "").Replace("\n", "").Split(new[] { "<FIM/>" }, StringSplitOptions.RemoveEmptyEntries);
+            string[] informacoesTabela = ObtenhaTipoDePonteiro(dividirTexto.First()).Split(',');
+            idx = informacoesTabela[1];
+
+            if (informacoesTabela[0].Contains("X2"))
+            {
+                metade = 1;
+            }
+
+            idx = Path.GetDirectoryName(nomeArquivo) + "\\" + idx;
+
+            Stream bin = new MemoryStream(File.ReadAllBytes(idx));
+
+            Stream backupTabela = new MemoryStream();
+            List<byte[]> arquivoEmbytes = new List<byte[]>();
+
+            tamanhoDaTabela = (int)bin.Length;
+
+            using (BinaryReader br = new BinaryReader(bin))
+            {
+                
+                byte[] tabela = br.ReadBytes(tamanhoDaTabela);
+                backupTabela = new MemoryStream(tabela);
+                quantidaDePonteiros = tamanhoDaTabela / 4;
+
+            }
+
+            posicaoTabela = tamanhoDoHeader;
+            MemoryStream tabelaNova = new MemoryStream();
+
+            using (BinaryWriter bw = new BinaryWriter(backupTabela))
+            {
+                int tamanhoTotal = 0;
+
+                foreach (var item in dividirTexto)
+                {
+                    string[] textoSplit = item.Replace("<b>", "\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    int[] infoPoint = ObtenhaInformacaoDoPonteiro(textoSplit[0]);
+                    posicaoTabela = infoPoint[0];
+                    bw.BaseStream.Seek(posicaoTabela, SeekOrigin.Begin);
+                    bw.Write(ponteiro + infoPoint[1] >> metade);
+
+                    string textoQueSeraConvertido = RemovaTagsDoTexto(textoSplit[1]);
+                    byte[] textoEmbytes = Encoding.Unicode.GetBytes(textoQueSeraConvertido);
+                    arquivoEmbytes.Add(textoEmbytes);
+                    tamanhoTotal += textoEmbytes.Length;
+                    ponteiro = tamanhoTotal;
+
+                }
+
+                bw.BaseStream.Position = 0;
+                backupTabela.CopyTo(tabelaNova);
+            }
+
+            byte[] textoFinalEmByte = new byte[ponteiro];
+
+            MemoryStream textoFinal = new MemoryStream(textoFinalEmByte);
+
+            using (BinaryWriter bw = new BinaryWriter(textoFinal))
+            {
+
+                foreach (var item in arquivoEmbytes)
+                {
+                    bw.Write(item);
+                }
+
+                textoFinalEmByte = textoFinal.ToArray();
+            }
+
+            File.WriteAllBytes(nomeArquivo.Replace(".txt", ".bin"), textoFinalEmByte);
+
+            File.WriteAllBytes(idx, tabelaNova.ToArray());
+
+        }
+
+        private void InsiraInternoDireto(string texto, string nomeArquivo)
+        {
+            int quantidaDePonteiros = 0;
+            int tamanhoDoArquivoEmBytes = 0;
+            int tamanhoDaTabela = 0;
+            int posicaoTabela = 0;
+            int ponteiro = 0;
+
+            string[] dividirTexto = texto.Replace("\r", "").Replace("\n", "").Split(new[] { "<FIM/>" }, StringSplitOptions.RemoveEmptyEntries);
+            Stream bin = new MemoryStream(File.ReadAllBytes(nomeArquivo.Replace(".txt", ".bin")));
+            Stream backupTabela = new MemoryStream();
+            List<byte[]> arquivoEmbytes = new List<byte[]>();
+
+
+            using (BinaryReader br = new BinaryReader(bin))
+            {
+                tamanhoDaTabela = br.ReadInt32();
+                quantidaDePonteiros = tamanhoDaTabela / 8;
+               
+                br.BaseStream.Position = 0;
+                byte[] tabela = br.ReadBytes(tamanhoDaTabela);
+                backupTabela = new MemoryStream(tabela);
+            }
+
+            posicaoTabela = 0;
+            MemoryStream tabelaNova = new MemoryStream();
+
+            using (BinaryWriter bw = new BinaryWriter(backupTabela))
+            {
+                ponteiro = tamanhoDaTabela;
+
+                foreach (var item in dividirTexto)
+                {
+                    string[] textoSplit = item.Replace("<b>", "\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    int[] infoPoint = ObtenhaInformacaoDoPonteiro(textoSplit[0]);
+                    posicaoTabela = infoPoint[0];
+                    bw.BaseStream.Seek(posicaoTabela, SeekOrigin.Begin);
+                    bw.Write(ponteiro + infoPoint[1]);
+
+                    string textoQueSeraConvertido = RemovaTagsDoTexto(textoSplit[1]);
+                    byte[] textoEmbytes = Encoding.Unicode.GetBytes(textoQueSeraConvertido);
+                    arquivoEmbytes.Add(textoEmbytes);
+                    bw.Write(textoEmbytes.Length);
+
+                    ponteiro += textoEmbytes.Length;
+                    tamanhoDoArquivoEmBytes += textoEmbytes.Length;
+
+                }
+
+                bw.BaseStream.Position = 0;
+                backupTabela.CopyTo(tabelaNova);
+            }
+
+            byte[] textoFinalEmByte = new byte[tamanhoDoArquivoEmBytes + tabelaNova.Length];
+
+            MemoryStream textoFinal = new MemoryStream(textoFinalEmByte);
+
+            using (BinaryWriter bw = new BinaryWriter(textoFinal))
+            {
+
+                bw.Write(tabelaNova.ToArray());
+
+                foreach (var item in arquivoEmbytes)
+                {
+                    bw.Write(item);
+                }
+
+                textoFinalEmByte = textoFinal.ToArray();
+            }
+
+            File.WriteAllBytes(nomeArquivo.Replace(".txt", ".bin"), textoFinalEmByte);
+        }
+
+        private void InsiraInternoIndireto(string texto, string nomeArquivo)
+        {
+            int quantidaDePonteiros = 0;
+            int tamanhoDoHeader = 0;
+            int tamanhoDaTabela = 0;
+            int posicaoTabela = 0;
+            int ponteiro = 0;
+
+            string[] dividirTexto = texto.Replace("\r", "").Replace("\n", "").Split(new[] { "<FIM/>" }, StringSplitOptions.RemoveEmptyEntries);
+            Stream bin = new MemoryStream(File.ReadAllBytes(nomeArquivo.Replace(".txt", ".bin")));
+            Stream backupTabela = new MemoryStream();
+            List<byte[]> arquivoEmbytes = new List<byte[]>();
+           
+
+            using (BinaryReader br = new BinaryReader(bin))
+            {
+                quantidaDePonteiros = br.ReadInt32();
+                tamanhoDoHeader = br.ReadInt32();
+                tamanhoDaTabela = br.ReadInt32();
+                br.BaseStream.Position = 0;
+                byte[] tabela = br.ReadBytes(tamanhoDaTabela);
+                backupTabela = new MemoryStream(tabela);
+            }
+
+            posicaoTabela = tamanhoDoHeader;
+            MemoryStream tabelaNova = new MemoryStream();
+
+            using (BinaryWriter bw = new BinaryWriter(backupTabela))
+            {
+                
+               foreach (var item in dividirTexto)
+                {                   
+                    string[] textoSplit = item.Replace("<b>", "\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    int[] infoPoint = ObtenhaInformacaoDoPonteiro(textoSplit[0]);
+                    posicaoTabela = infoPoint[0];           
+                    bw.BaseStream.Seek(posicaoTabela, SeekOrigin.Begin);
+                    bw.Write(ponteiro + infoPoint[1]);
+
+                    string textoQueSeraConvertido = RemovaTagsDoTexto(textoSplit[1]);
+                    byte[] textoEmbytes = Encoding.Unicode.GetBytes(textoQueSeraConvertido);
+                    arquivoEmbytes.Add(textoEmbytes);
+                    ponteiro += textoEmbytes.Length;
+                    
+                }
+
+                bw.BaseStream.Position = 0;
+                backupTabela.CopyTo(tabelaNova);
+            }
+
+            byte[] textoFinalEmByte = new byte[ponteiro + tabelaNova.Length];
+
+            MemoryStream textoFinal = new MemoryStream(textoFinalEmByte);
+
+            using (BinaryWriter bw = new BinaryWriter(textoFinal))
+            {
+                
+                bw.Write(tabelaNova.ToArray());
+
+                foreach (var item in arquivoEmbytes)
+                {
+                    bw.Write(item);
+                }
+
+                textoFinalEmByte = textoFinal.ToArray();
+            }
+
+            File.WriteAllBytes(nomeArquivo.Replace(".txt", ".bin"), textoFinalEmByte);
+        }
+
+        private int[] ObtenhaInformacaoDoPonteiro(string texto)
+        {
+            texto = texto.Replace(" ", "").Replace(">","");
+            int[] informacoes = new int[2];
+            string[] inf = texto.Split(':');
+            string[] separaInfo = inf[1].Split(',');
+            int posicaoPonteiro = int.Parse(separaInfo[0]);
+            int valorASomarPonteiro = int.Parse(separaInfo[1]);
+
+            informacoes[0] = posicaoPonteiro;
+            informacoes[1] = valorASomarPonteiro;
+
+            return informacoes;
+        }
+
+        private string RemovaTagsDoTexto(string texto)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < texto.Length; i++)
+            {
+                if (texto[i] != '<')
+                {
+                    sb.Append(texto[i]);
+                }
+                else
+                {
+                    string argumento = "";
+                    while (texto[i] != '>')
+                    {
+                        argumento += texto[i];
+
+                        i++;
+                    }
+
+                    argumento += texto[i];
+                    argumento = ConversorDeArgumentos(argumento);
+                    sb.Append(argumento);
+                }
+            }
+            return sb.ToString();
+        }
+
+        private string ConversorDeArgumentos(string argumento)
+        {
+            if (argumento.Contains("<NULL>"))
+            {
+                return "\0";
+            }
+
+            if (argumento.Contains("<r>"))
+            {
+                return "\r";
+            }
+
+            if (argumento.ToUpper().Contains("<COR") || argumento.ToUpper().Contains("<JOGADOR"))
+            {
+                argumento = argumento.Replace(" ", "").Replace(">", "");
+                string[] valorCor = argumento.Split(':');
+                return valorCor.Last();
+            }
+
+            return null;
+        }
+
+        private string ObtenhaTipoDePonteiro(string texto)
+        {
+            string[] dividir = texto.Replace(".bin>", ".bin>~").Split('~');
+            string[] outraDivi = dividir[0].Replace(" ", "").Replace("<", "").Replace(">", "").Split('=');
+            if (texto.Contains("CARD_Indx"))
+                return outraDivi[1] + "," + outraDivi[2] + "," + outraDivi[3];
+            else
+                return outraDivi[1] + "," + outraDivi[2];
+            
+            
+        }
+
+        private void Comprima(string cardDesc, string cardHuff, string cardIdx)
+        {
+            Huffman huffman = new Huffman();
+            huffman.Comprimir(cardDesc, cardHuff, cardIdx);
         }
     }
 

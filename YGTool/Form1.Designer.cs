@@ -30,63 +30,63 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.arquivosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.arquivosTSM = new System.Windows.Forms.ToolStripMenuItem();
             this.tagForceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.eHPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportarÚnicoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportarDePastaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.compressãoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.compressãoTSM = new System.Windows.Forms.ToolStripMenuItem();
             this.gzipToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.comprimirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.comprimirToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.imagensToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.imagensTSM = new System.Windows.Forms.ToolStripMenuItem();
             this.tagForceToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.gimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportarÚnicoToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.exportarDePastaToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.textoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textoTSM = new System.Windows.Forms.ToolStripMenuItem();
             this.tagForceToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.importarÚnicoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importarEmLoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.extrairToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.poneirosInternosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sobreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ajudaTSM = new System.Windows.Forms.ToolStripMenuItem();
             this.ajudaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.únicoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.emLoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ponteirosInternosDiretosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.únicoToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.loteeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ponteirosExternosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ponteirosExternosToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.únicoToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.cardInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.únicoToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.dLGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importarTextosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.arquivosToolStripMenuItem,
-            this.compressãoToolStripMenuItem,
-            this.imagensToolStripMenuItem,
-            this.textoToolStripMenuItem,
-            this.sobreToolStripMenuItem});
+            this.arquivosTSM,
+            this.compressãoTSM,
+            this.imagensTSM,
+            this.textoTSM,
+            this.ajudaTSM});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(344, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // arquivosToolStripMenuItem
+            // arquivosTSM
             // 
-            this.arquivosToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.arquivosTSM.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tagForceToolStripMenuItem});
-            this.arquivosToolStripMenuItem.Name = "arquivosToolStripMenuItem";
-            this.arquivosToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
-            this.arquivosToolStripMenuItem.Text = "Arquivos";
+            this.arquivosTSM.Name = "arquivosTSM";
+            this.arquivosTSM.Size = new System.Drawing.Size(66, 20);
+            this.arquivosTSM.Text = "Arquivos";
             // 
             // tagForceToolStripMenuItem
             // 
@@ -121,13 +121,13 @@
             this.exportarDePastaToolStripMenuItem.Text = "Exportar de Em Lote";
             this.exportarDePastaToolStripMenuItem.Click += new System.EventHandler(this.exportarDePastaToolStripMenuItem_Click);
             // 
-            // compressãoToolStripMenuItem
+            // compressãoTSM
             // 
-            this.compressãoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.compressãoTSM.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.gzipToolStripMenuItem});
-            this.compressãoToolStripMenuItem.Name = "compressãoToolStripMenuItem";
-            this.compressãoToolStripMenuItem.Size = new System.Drawing.Size(85, 20);
-            this.compressãoToolStripMenuItem.Text = "Compressão";
+            this.compressãoTSM.Name = "compressãoTSM";
+            this.compressãoTSM.Size = new System.Drawing.Size(85, 20);
+            this.compressãoTSM.Text = "Compressão";
             // 
             // gzipToolStripMenuItem
             // 
@@ -152,13 +152,13 @@
             this.comprimirToolStripMenuItem1.Text = "Comprimir";
             this.comprimirToolStripMenuItem1.Click += new System.EventHandler(this.comprimirToolStripMenuItem1_Click);
             // 
-            // imagensToolStripMenuItem
+            // imagensTSM
             // 
-            this.imagensToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.imagensTSM.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tagForceToolStripMenuItem1});
-            this.imagensToolStripMenuItem.Name = "imagensToolStripMenuItem";
-            this.imagensToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
-            this.imagensToolStripMenuItem.Text = "Imagens";
+            this.imagensTSM.Name = "imagensTSM";
+            this.imagensTSM.Size = new System.Drawing.Size(64, 20);
+            this.imagensTSM.Text = "Imagens";
             // 
             // tagForceToolStripMenuItem1
             // 
@@ -189,18 +189,19 @@
             this.exportarDePastaToolStripMenuItem1.Size = new System.Drawing.Size(165, 22);
             this.exportarDePastaToolStripMenuItem1.Text = "Exportar de pasta";
             // 
-            // textoToolStripMenuItem
+            // textoTSM
             // 
-            this.textoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.textoTSM.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tagForceToolStripMenuItem2});
-            this.textoToolStripMenuItem.Name = "textoToolStripMenuItem";
-            this.textoToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
-            this.textoToolStripMenuItem.Text = "Textos";
+            this.textoTSM.Name = "textoTSM";
+            this.textoTSM.Size = new System.Drawing.Size(52, 20);
+            this.textoTSM.Text = "Textos";
             // 
             // tagForceToolStripMenuItem2
             // 
             this.tagForceToolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.extrairToolStripMenuItem});
+            this.extrairToolStripMenuItem,
+            this.importarTextosToolStripMenuItem});
             this.tagForceToolStripMenuItem2.Name = "tagForceToolStripMenuItem2";
             this.tagForceToolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
             this.tagForceToolStripMenuItem2.Text = "Tag Force";
@@ -239,13 +240,13 @@
             this.poneirosInternosToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
             this.poneirosInternosToolStripMenuItem.Text = "Ponteiros Internos Indiretos";
             // 
-            // sobreToolStripMenuItem
+            // ajudaTSM
             // 
-            this.sobreToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ajudaTSM.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ajudaToolStripMenuItem});
-            this.sobreToolStripMenuItem.Name = "sobreToolStripMenuItem";
-            this.sobreToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
-            this.sobreToolStripMenuItem.Text = "Ajuda";
+            this.ajudaTSM.Name = "ajudaTSM";
+            this.ajudaTSM.Size = new System.Drawing.Size(50, 20);
+            this.ajudaTSM.Text = "Ajuda";
             // 
             // ajudaToolStripMenuItem
             // 
@@ -257,15 +258,15 @@
             // únicoToolStripMenuItem
             // 
             this.únicoToolStripMenuItem.Name = "únicoToolStripMenuItem";
-            this.únicoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.únicoToolStripMenuItem.Text = "Único";
+            this.únicoToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.únicoToolStripMenuItem.Text = "strtbl/ msg / res / stbl";
             this.únicoToolStripMenuItem.Click += new System.EventHandler(this.únicoToolStripMenuItem_Click);
             // 
             // emLoteToolStripMenuItem
             // 
             this.emLoteToolStripMenuItem.Name = "emLoteToolStripMenuItem";
-            this.emLoteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.emLoteToolStripMenuItem.Text = "Em Lote";
+            this.emLoteToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.emLoteToolStripMenuItem.Text = "De pasta / Vários";
             this.emLoteToolStripMenuItem.Click += new System.EventHandler(this.emLoteToolStripMenuItem_Click);
             // 
             // ponteirosInternosDiretosToolStripMenuItem
@@ -281,23 +282,15 @@
             // 
             this.únicoToolStripMenuItem1.Name = "únicoToolStripMenuItem1";
             this.únicoToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
-            this.únicoToolStripMenuItem1.Text = "Único";
+            this.únicoToolStripMenuItem1.Text = "tuto_text";
             this.únicoToolStripMenuItem1.Click += new System.EventHandler(this.únicoToolStripMenuItem1_Click);
             // 
             // loteeToolStripMenuItem
             // 
-            this.loteeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ponteirosExternosToolStripMenuItem});
             this.loteeToolStripMenuItem.Name = "loteeToolStripMenuItem";
             this.loteeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.loteeToolStripMenuItem.Text = "Lote";
+            this.loteeToolStripMenuItem.Text = "De Pasta / Vários";
             this.loteeToolStripMenuItem.Click += new System.EventHandler(this.loteeToolStripMenuItem_Click);
-            // 
-            // ponteirosExternosToolStripMenuItem
-            // 
-            this.ponteirosExternosToolStripMenuItem.Name = "ponteirosExternosToolStripMenuItem";
-            this.ponteirosExternosToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.ponteirosExternosToolStripMenuItem.Text = "Ponteiros Externos";
             // 
             // ponteirosExternosToolStripMenuItem1
             // 
@@ -327,7 +320,7 @@
             // 
             this.únicoToolStripMenuItem3.Name = "únicoToolStripMenuItem3";
             this.únicoToolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
-            this.únicoToolStripMenuItem3.Text = "Único";
+            this.únicoToolStripMenuItem3.Text = "Pasta com binários";
             this.únicoToolStripMenuItem3.Click += new System.EventHandler(this.únicoToolStripMenuItem3_Click);
             // 
             // dLGToolStripMenuItem
@@ -336,6 +329,13 @@
             this.dLGToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.dLGToolStripMenuItem.Text = "DLG";
             this.dLGToolStripMenuItem.Click += new System.EventHandler(this.dLGToolStripMenuItem_Click);
+            // 
+            // importarTextosToolStripMenuItem
+            // 
+            this.importarTextosToolStripMenuItem.Name = "importarTextosToolStripMenuItem";
+            this.importarTextosToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.importarTextosToolStripMenuItem.Text = "Importar Textos";
+            this.importarTextosToolStripMenuItem.Click += new System.EventHandler(this.importarTextosToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -360,39 +360,39 @@
         #endregion
 
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem arquivosToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem arquivosTSM;
         private System.Windows.Forms.ToolStripMenuItem tagForceToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem eHPToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportarÚnicoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportarDePastaToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem compressãoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem compressãoTSM;
         private System.Windows.Forms.ToolStripMenuItem gzipToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem comprimirToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem comprimirToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem imagensToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem imagensTSM;
         private System.Windows.Forms.ToolStripMenuItem tagForceToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem gimToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportarÚnicoToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem textoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem textoTSM;
         private System.Windows.Forms.ToolStripMenuItem exportarDePastaToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem tagForceToolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem importarÚnicoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importarEmLoteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem extrairToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem poneirosInternosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem sobreToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ajudaTSM;
         private System.Windows.Forms.ToolStripMenuItem ajudaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem únicoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem emLoteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ponteirosInternosDiretosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem únicoToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem loteeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem ponteirosExternosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ponteirosExternosToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem únicoToolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem cardInfoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem únicoToolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem dLGToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importarTextosToolStripMenuItem;
     }
 }
 
