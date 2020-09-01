@@ -8,7 +8,7 @@ namespace YGTool.Arquivo
 {
     public interface IArquivos
     {
-        void ExportarArquivo();
-        void ImportarArquivo();
+        bool ExportarArquivo();
+        bool ImportarArquivo();
     }
 }

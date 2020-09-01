@@ -22,6 +22,8 @@ namespace YGTool.Compressao
             int valorHuff = 0;
             int quantidadeDePonteiros = (int)((cardIndx.Length / 4) / 2);
             int enderecoDoPonteiro = 0x4;
+            int tamanhoEmBits = (int)descricao.Length * 8;
+            int ponteiro = 0;
 
             using (BinaryReader leitorDePonteiro = new BinaryReader(cardIndx))
             {
@@ -30,11 +32,12 @@ namespace YGTool.Compressao
                 {
                     using (BinaryReader leitorDeDescricao = new BinaryReader(descricao))
                     {
-                        for (int i = 0; i < quantidadeDePonteiros - 1; i++)
+                        for (int i = 0; i < quantidadeDePonteiros; i++)
                         {
 
                             leitorDePonteiro.BaseStream.Seek(enderecoDoPonteiro, SeekOrigin.Begin);
                             ponteiroDescricao = leitorDePonteiro.ReadInt32();
+                            ponteiro = ponteiroDescricao;
                             ponteiroArquivoComprimido = ponteiroDescricao >> 3;
                             int quantidadeDeBitsANaoUsar = ponteiroDescricao & 7;
                             int numeroDeBits = 7;
@@ -46,6 +49,10 @@ namespace YGTool.Compressao
                             while (quantidadeDeBitsAUsar >= 0)
                             {
                                 leitorDeDescricao.BaseStream.Seek(ponteiroArquivoComprimido, SeekOrigin.Begin);
+                                if (ponteiroArquivoComprimido * 8 == tamanhoEmBits)
+                                {
+                                    break;
+                                }
                                 valorComprimido = leitorDeDescricao.ReadByte();
                                 int proximoBit = valorComprimido >> quantidadeDeBitsAUsar;
                                 int posicaoNaArvoreHuffman = (proximoBit & 0x1) * 2;
@@ -90,6 +97,11 @@ namespace YGTool.Compressao
                             }
 
                             bufferTotal.AddRange(bufferDescompressaoParcial);
+                            bufferTotal.Add(0x3C);
+                            bufferTotal.Add(0x45);
+                            bufferTotal.Add(0x4E);
+                            bufferTotal.Add(0x44);
+                            bufferTotal.Add(0x3E);
                             enderecoDoPonteiro += 8;
                             bufferDescompressaoParcial.Clear();
 
@@ -98,11 +110,14 @@ namespace YGTool.Compressao
                     }
                 }
 
-                
+
 
                 return bufferTotal;
 
             }
+
+
+
 
         }
 

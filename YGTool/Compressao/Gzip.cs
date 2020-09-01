@@ -54,6 +54,7 @@ namespace YGTool.Compressao
 
                     byte[] novoCompHeaderCerto = new byte[0xA + nomeArquivo.Length + 1 + comprimido.Length];
 
+
                     novoComp = new MemoryStream(novoCompHeaderCerto);
 
                     using (BinaryWriter bw = new BinaryWriter(novoComp))

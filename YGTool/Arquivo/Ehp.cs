@@ -9,12 +9,17 @@ namespace YGTool.Arquivo
 {
     public class Ehp : IArquivos
     {
-        public byte[] Magico { get; set; }
+        public int Magico { get; set; }
         public int TamanhoEhp { get; set; }
         public byte[] Magico2 { get; set; }
         public int QuantidadeDeArquivos { get; set; }
         public string DiretorioArquivo { get; set; }
         public string NomeDoArquivo { get; set; }
+
+        public Ehp()
+        {
+
+        }
 
         public Ehp(string diretorioArquivo, string nomeDoArquivo)
         {
@@ -26,15 +31,20 @@ namespace YGTool.Arquivo
 
             using (BinaryReader br = new BinaryReader(ArquivoEhp))
             {
-                Magico = br.ReadBytes(4);
+                Magico = br.ReadInt32();
                 TamanhoEhp = br.ReadInt32();
                 Magico2 = br.ReadBytes(4);
                 QuantidadeDeArquivos = br.ReadInt32();
             }
+
+            if (Magico != 0x03504845)
+            {
+                throw new Exception("Este não é um arquivo ehp!");
+            }
         }
 
 
-        public void ExportarArquivo()
+        public bool ExportarArquivo()
         {
             string diretorioEhp = DiretorioArquivo + "\\" + NomeDoArquivo + ".ehp";
             Stream st = new MemoryStream(File.ReadAllBytes(diretorioEhp));
@@ -84,10 +94,13 @@ namespace YGTool.Arquivo
                     File.WriteAllBytes(diretorioFinal, arquivo);
 
                 }
+               
             }
+
+            return true;
         }
 
-        public void ImportarArquivo()
+        public bool ImportarArquivo()
         {
             string diretorioEhp = DiretorioArquivo + "\\" + NomeDoArquivo + ".ehp";
             byte[] arquivo = File.ReadAllBytes(diretorioEhp);  
@@ -200,8 +213,125 @@ namespace YGTool.Arquivo
             byte[] ehpEditadoEmbytes = new byte[ponteiroAtualizado];
             Array.Copy(ehpEditado.ToArray(),ehpEditadoEmbytes,ponteiroAtualizado);
             File.WriteAllBytes(diretorioEhp, ehpEditadoEmbytes);
+
+            return true;
             
         }
 
+        public bool ProcurarEHPNoBootBin(string dirBootBin)
+        {
+            Stream boot = new MemoryStream(File.ReadAllBytes(dirBootBin));
+            int header = 0x03504845;
+            List<string> ehpInfo = new List<string>();
+                      
+
+            using (BinaryReader br = new BinaryReader(boot))
+            {
+                int contador = 0;
+
+                int verificaHeaderElf = br.ReadInt32();
+                if (verificaHeaderElf != 0x464C457F)
+                {
+                    throw new Exception("Não é um arquivo Eboot válido ou está criptografado!");
+                }
+                string dirExtBoot = Path.GetFileName(dirBootBin.Replace(".BIN",""));
+                Directory.CreateDirectory(dirExtBoot).Create();
+
+                br.BaseStream.Position = 0;
+
+                while (br.BaseStream.Position < boot.Length - 4)
+                {
+                    int valor = br.ReadInt32();
+
+                    if (valor == header)
+                    {
+                        int indexInt = (int)br.BaseStream.Position - 4;
+                        int tamanhoEhp = br.ReadInt32();
+                        br.BaseStream.Position = indexInt;
+                        byte[] ehpEmbyte = br.ReadBytes(tamanhoEhp);
+                        string index = indexInt + "";
+                        string nomeEhp = contador + "";
+                        contador++;
+                        File.WriteAllBytes(dirExtBoot + "\\" + nomeEhp + ".ehp", ehpEmbyte);
+                        ehpInfo.Add(index + "," + dirExtBoot + "\\" + nomeEhp + ".ehp");
+                        Ehp ehp = new Ehp(dirExtBoot, nomeEhp);
+                        ehp.ExportarArquivo();
+                    }
+                }
+
+                File.WriteAllLines(dirBootBin.ToUpper().Replace(".BIN",".txt"), ehpInfo);                
+            }
+
+            return true;
+        }
+
+        public bool InsiraNoEboot(string dirSndDat)
+        {
+            string[] arquivos = File.ReadAllLines(dirSndDat);
+
+            using (BinaryWriter writer = new BinaryWriter(File.Open(dirSndDat.Replace(".txt", ".BIN"), FileMode.Open)))
+            {
+
+                for (int i = 0; i < arquivos.Length; i++)
+                {
+                    string info = arquivos[i];
+
+                    if (info != "")
+                    {
+                        string[] fileInfo = info.Split(',');
+                        int posicaoArquivo = int.Parse(fileInfo[0]);
+                        string diretorio = fileInfo[1];
+                        if (Path.GetFileName(diretorio) == "3.ehp" || Path.GetFileName(diretorio) == "4.ehp" || Path.GetFileName(diretorio) == "5.ehp")
+                        {
+                            InsiraEHPEspecial(diretorio);
+                        }
+                        byte[] arquivo = File.ReadAllBytes(diretorio);
+                        writer.BaseStream.Seek(posicaoArquivo, SeekOrigin.Begin);
+                        writer.Write(arquivo);
+
+                    }
+                }
+
+
+            }
+
+            return true;
+
+
+        }
+
+        private void InsiraEHPEspecial(string dir)
+        {
+            int ponteiroNome = 0;
+            int ponteiroArquivo = 0;
+            int idxTamanhoArquivo = 0;
+
+            using (BinaryReader br = new BinaryReader(File.Open(dir,FileMode.Open)))
+            {
+                br.BaseStream.Position = 0x10;
+                ponteiroNome = br.ReadInt32();
+                ponteiroArquivo = br.ReadInt32();
+
+                br.BaseStream.Position = ponteiroNome;
+                byte valor = br.ReadByte();
+                while (valor != 0)
+                {
+                    valor = br.ReadByte();
+                }
+
+                idxTamanhoArquivo = (int)br.BaseStream.Position;
+            }
+
+            string[] arquivos = Directory.GetFiles(dir.Replace(".ehp",""),"*.bin");
+            byte[] arquivoIngles = File.ReadAllBytes(arquivos[0]);
+
+            using (BinaryWriter bw = new BinaryWriter(File.Open(dir,FileMode.Open)))
+            {
+                bw.BaseStream.Position = idxTamanhoArquivo;
+                bw.Write((int)arquivoIngles.Length);
+                bw.BaseStream.Position = ponteiroArquivo;
+                bw.Write(arquivoIngles);
+            }
+        }
     }
 }
