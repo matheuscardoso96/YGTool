@@ -473,7 +473,7 @@ namespace YGTool
                             gim.BmpParaGim(openFileDialog.FileName);
                         }
 
-                        Mensagem("Imagem exportada com sucesso!", "Sucesso", MessageBoxIcon.Information);
+                        Mensagem("Imagem importada com sucesso!", "Sucesso", MessageBoxIcon.Information);
 
                     }
                 }
@@ -615,11 +615,12 @@ namespace YGTool
                             {
                                 Gim gim = new Gim(nomeArquivo);
                                 gim.BmpParaGim(diretorioArquivo);
+                               
                             }
 
                         }
 
-                        Mensagem("Imagens exportadas com sucesso!", "Sucesso!", MessageBoxIcon.Information);
+                        Mensagem("Imagens importadas com sucesso!", "Sucesso!", MessageBoxIcon.Information);
                     }
                 }
 

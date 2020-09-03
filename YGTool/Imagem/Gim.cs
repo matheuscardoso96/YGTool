@@ -260,42 +260,45 @@ namespace YGTool.Imagem
         private Bitmap ConvertaDXT1(byte[] img)
         {
             Bitmap imagemFinal = new Bitmap(ImagemGim.Largura, ImagemGim.Altura);
-            Graphics g = Graphics.FromImage(imagemFinal);
-            using (BinaryReader br = new BinaryReader(new MemoryStream(img)))
-            {
-                for (int y1 = 0; y1 < ImagemGim.Altura; y1 += 4)
-                {
-                    for (int x1 = 0; x1 < ImagemGim.Largura; x1 += 4)
-                    {
-                        uint informacaoBloco = br.ReadUInt32();
-                        byte[] cores = br.ReadBytes(4);
-                        PaletaGim = new PaletaGim();
-                        ConvertaBGR565(cores);
-                        PaletaGim.PaletaDeCores = InterpoleCores(PaletaGim.PaletaDeCores);
-                        Bitmap texel = new Bitmap(4, 4);
-                        int valor = 0;
+ 
 
-                        for (int y = 0; y < 4; y++)
+            using (Graphics g = Graphics.FromImage(imagemFinal))
+            {
+                using (BinaryReader br = new BinaryReader(new MemoryStream(img)))
+                {
+                    for (int y1 = 0; y1 < ImagemGim.Altura; y1 += 4)
+                    {
+                        for (int x1 = 0; x1 < ImagemGim.Largura; x1 += 4)
                         {
-                            for (int x = 0; x < 4; x++)
+                            uint informacaoBloco = br.ReadUInt32();
+                            byte[] cores = br.ReadBytes(4);
+                            PaletaGim = new PaletaGim();
+                            ConvertaBGR565(cores);
+                            PaletaGim.PaletaDeCores = InterpoleCores(PaletaGim.PaletaDeCores);
+                            Bitmap texel = new Bitmap(4, 4);
+                            int valor = 0;
+
+                            for (int y = 0; y < 4; y++)
                             {
-                                informacaoBloco = informacaoBloco >> valor;
-                                int pixelInfo = (int)informacaoBloco & 3;
-                                texel.SetPixel(x, y, PaletaGim.PaletaDeCores[pixelInfo]);
-                                valor = 2;
+                                for (int x = 0; x < 4; x++)
+                                {
+                                    informacaoBloco = informacaoBloco >> valor;
+                                    int pixelInfo = (int)informacaoBloco & 3;
+                                    texel.SetPixel(x, y, PaletaGim.PaletaDeCores[pixelInfo]);
+                                    valor = 2;
+                                }
                             }
+
+                            g.DrawImage(texel, x1, y1, texel.Width, texel.Height);
+                            texel.Dispose();
+
                         }
 
-                        g.DrawImage(texel, x1, y1, texel.Width, texel.Height);
-                        texel.Dispose();
 
                     }
-
-
                 }
             }
 
-            g.Dispose();
             return imagemFinal;
         }
 
@@ -466,7 +469,8 @@ namespace YGTool.Imagem
         private void ImporteDxt1(string dirImg)
         {
 
-            List<Bitmap> texels = ObtenhaTexels(dirImg);
+            List<Bitmap> texels = new List<Bitmap>();
+            texels = ObtenhaTexels(dirImg);
 
             MemoryStream imgEditada = new MemoryStream(ImagemGim.TamanhoDoGrafico);
 
@@ -476,6 +480,7 @@ namespace YGTool.Imagem
 
                 foreach (var texel in texels)
                 {
+
 
                     Dictionary<Color, int> coresPaletaFrq = ObtenhaCoresTexels(texel);
                     List<Color> coresPaleta = ObtenhaCorMinimaEMaxima(coresPaletaFrq);
@@ -509,9 +514,15 @@ namespace YGTool.Imagem
                         break;
                     }
 
-                   
+                    texel.Dispose();
+                    coresPaletaFrq.Clear();
+                    coresPaleta.Clear();
+
+
                 }
 
+                
+                texels.Clear();
                 InsiraBytesNoGim(GimBytes, imgEditada.ToArray());
                 File.WriteAllBytes(Diretorio, GimBytes);
             }
@@ -651,7 +662,7 @@ namespace YGTool.Imagem
                 for (int x = 0; x < imagem.Width; x += 4)
                 {
                     Rectangle rect = new Rectangle(x, y, 4, 4);
-                    texels.Add(new Bitmap(imagem.Clone(rect, imagem.PixelFormat)));
+                    texels.Add(imagem.Clone(rect, imagem.PixelFormat));
                 }
             }
 
@@ -716,7 +727,7 @@ namespace YGTool.Imagem
 
             }
 
-
+            imagem.Dispose();
             return freqcores;
         }
 
