@@ -77,28 +77,6 @@ namespace YGTool.Imagem
 
         public Gim(string diretorio)
         {
-            /*  byte[] paletaaa;
-
-              ImagemGim = new ImagemGim();
-              ImagemGim.Swizzle = true;
-              ImagemGim.Largura = 32; //128; //256;
-              ImagemGim.Altura = 32;//128; //256;
-
-              using (BinaryReader br = new BinaryReader(File.Open(diretorio,FileMode.Open)))
-              {
-                  br.BaseStream.Position = 0x540;
-                  paletaaa = br.ReadBytes(0x400);
-                  br.BaseStream.Position = 0x15A20; //0x14A20; //0x10A20; //0xA20;
-                  ImagemGim.Imagem = br.ReadBytes(ImagemGim.Largura * ImagemGim.Altura);
-
-              }
-              PaletaDeCores = new List<Color>();
-
-              ConvertaABRG8888(paletaaa);
-
-              Bitmap teste = ExporteFormato(FormatoDaImagem.Index8, ImagemGim.Imagem);
-              teste.Save("fonte4.png");
-              */
 
             Diretorio = diretorio;
             byte[] gim = File.ReadAllBytes(diretorio);
@@ -266,12 +244,12 @@ namespace YGTool.Imagem
                 while (br.BaseStream.Position < entrada.Length)
                 {
                     uint corAbgr = br.ReadUInt16();
-                    uint a = 0xFF;
+                   
                     uint b = ((corAbgr >> 0) & 0x1F) * 0xFF / 0x1F;
                     uint g = ((corAbgr >> 5) & 0x3F) * 0xFF / 0x3F;
                     uint r = ((corAbgr >> 11) & 0x1F) * 0xFF / 0x1F;
 
-                    PaletaGim.AdicionarCor(Color.FromArgb((int)a, (int)r, (int)g, (int)b));
+                    PaletaGim.AdicionarCor(Color.FromArgb((int)r, (int)g, (int)b));
 
                 }
 
@@ -309,6 +287,7 @@ namespace YGTool.Imagem
                         }
 
                         g.DrawImage(texel, x1, y1, texel.Width, texel.Height);
+                        texel.Dispose();
 
                     }
 
@@ -316,7 +295,7 @@ namespace YGTool.Imagem
                 }
             }
 
-
+            g.Dispose();
             return imagemFinal;
         }
 
@@ -493,6 +472,8 @@ namespace YGTool.Imagem
 
             using (BinaryWriter bw = new BinaryWriter(imgEditada))
             {
+                
+
                 foreach (var texel in texels)
                 {
 
@@ -517,14 +498,18 @@ namespace YGTool.Imagem
                     }
 
                     bw.Write(pixelInfo);
-                    bw.Write(RGB888ParaRGB565(coresPaleta[0]));
-                    bw.Write(RGB888ParaRGB565(coresPaleta[1]));
+                    ushort c0 = RGB888ParaRGB565(coresPaleta[0]);
+                    ushort c1 = RGB888ParaRGB565(coresPaleta[1]);
+                    bw.Write(c0);
+                    bw.Write(c1);
 
 
                     if (bw.BaseStream.Position == imgEditada.Capacity)
                     {
                         break;
                     }
+
+                   
                 }
 
                 InsiraBytesNoGim(GimBytes, imgEditada.ToArray());
@@ -541,8 +526,8 @@ namespace YGTool.Imagem
         private List<Color> ObtenhaCorMinimaEMaxima(Dictionary<Color, int> cores)
         {
 
-            cores = cores.OrderByDescending(pair => pair.Value).Take(4)
-               .ToDictionary(pair => pair.Key, pair => pair.Value);
+            //cores = cores.OrderByDescending(pair => pair.Value).Take(4)
+              // .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             Dictionary<Color, double> intensidade = new Dictionary<Color, double>();
 
@@ -557,8 +542,22 @@ namespace YGTool.Imagem
                .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             List<Color> coress = new List<Color>();
-            coress.Add(intensidade.Last().Key);
-            coress.Add(intensidade.First().Key);
+
+            ushort c0 = RGB888ParaRGB565(intensidade.Last().Key);
+            ushort c1 = RGB888ParaRGB565(intensidade.First().Key);
+
+            if (c0 > c1)
+            {
+                coress.Add(intensidade.Last().Key);
+                coress.Add(intensidade.First().Key);
+            }
+            else {
+                
+                coress.Add(intensidade.First().Key);
+                coress.Add(intensidade.Last().Key);
+            }
+
+            
 
             return coress;
         }
@@ -566,8 +565,8 @@ namespace YGTool.Imagem
 
         private ushort RGB888ParaRGB565(Color cor)
         {
-            ushort corBGR = (ushort)(((cor.R & 0b11111000) << 8) | ((cor.G & 0b11111100) << 3) | (cor.B >> 3));
-
+            //ushort corBGR = (ushort)(((cor.R & 0b11111000) << 8) | ((cor.G & 0b11111100) << 3) | (cor.B >> 3));
+            ushort corBGR = (ushort) (((cor.R >> 3) << 11) | ((cor.G >> 2) << 5) | (cor.B >> 3));
             return corBGR;
         }
 
@@ -656,6 +655,7 @@ namespace YGTool.Imagem
                 }
             }
 
+            imagem.Dispose();
             return texels;
         }
 

@@ -849,7 +849,7 @@ namespace YGTool.Texto
 
             using (BinaryWriter bw = new BinaryWriter(backupTabela))
             {
-
+                bw.Write((dividirTexto.Length * 4) + 4);
                 foreach (var item in dividirTexto)
                 {
                     string[] textoSplit = item.Replace("<b>", "\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);

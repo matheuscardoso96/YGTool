@@ -20,6 +20,7 @@ namespace YGTool
         public TelaPrincipal()
         {
             InitializeComponent();
+            // 0x7002 0x1B11
 
         }
 
@@ -434,6 +435,8 @@ namespace YGTool
                             Gim gim = new Gim(diretorioArquivo);
                             Bitmap imagemE = gim.GimParaBmp();
                             imagemE.Save(diretorioArquivo.Replace(".gim", ".png"), ImageFormat.Png);
+                            imagemE.Dispose();
+                            gim = null;
                             
                            
                         }

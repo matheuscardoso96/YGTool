@@ -48,7 +48,7 @@ namespace YGTool.Telas
         }
 
         private List<string> ArquivosBMP = new List<string>();
-        private Font _fonteNomeCarta = new Font("YGO_Card_NA", 9.0f);//
+        private Font _fonteNomeCarta = new Font("YuGiOh_Cartas", 9.0f);//
         private Bitmap _fundoSelecionado = null;
         private List<string> _listaDeFundos = new List<string>();
 
@@ -148,6 +148,10 @@ namespace YGTool.Telas
             g.DrawImage(parte3, 48, 8, parte3.Width, parte3.Height);
 
             g.Dispose();
+            parte1.Dispose();
+            parte2.Dispose();
+            parte3.Dispose();
+
             pictureNomeOrdemCerta.Image = new Bitmap(final);
 
             pictureBoxEditaval.Image = new Bitmap (_fundoSelecionado);
@@ -206,20 +210,27 @@ namespace YGTool.Telas
 
                     if (parte1.Width > 80)
                     {
-                        parte1 = ResizeImage(parte1, 78, 12);
+                        parte1 = new Bitmap(ResizeImage(parte1, 78, 12));
+                       
                     }
 
                     Graphics g2 = Graphics.FromImage(bmp);
                     g2.DrawImage(parte1, 0, 0, parte1.Width, parte1.Height);
-                    g2.Flush();
+                    parte1.Dispose();
+                    g2.Dispose();
                     pictureBoxEditaval.Image = bmp;
+                    
                 }
 
+                g.Dispose();
+                gg.Dispose();
             }
             else
             {
                 pictureBoxEditaval.Image = bmp;
             }
+
+            
         }
 
         public static Bitmap ResizeImage(Image image, int width, int height)
@@ -242,10 +253,22 @@ namespace YGTool.Telas
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
                     graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
                 }
+
+                graphics.Dispose();
             }
 
             return destImage;
         }
+
+        private static Bitmap ResizeBitmap(Bitmap sourceBMP, int width, int height)
+        {
+            Bitmap result = new Bitmap(width, height);
+            using (Graphics g = Graphics.FromImage(result))
+                g.DrawImage(sourceBMP, 0, 0, width, height);
+            return result;
+        }
+
+
 
         private void AdicionarItemsAComboBox()
         {
