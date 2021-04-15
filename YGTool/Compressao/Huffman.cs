@@ -10,13 +10,13 @@ namespace YGTool.Compressao
     public class Huffman
     {
 
-        public List<short> Descomprimir(string dirDescricao, string dirCardHuff, string dirCardIndx)
+        public List<string> Descomprimir(string dirDescricao, string dirCardHuff, string dirCardIndx)
         {
             Stream descricao = new MemoryStream(File.ReadAllBytes(dirDescricao));
             Stream cardIndx = new MemoryStream(File.ReadAllBytes(dirCardIndx));
             Stream cardHuff = new MemoryStream(File.ReadAllBytes(dirCardHuff));
-            List<short> bufferDescompressaoParcial = new List<short>();
-            List<short> bufferTotal = new List<short>();
+            List<string> descricoes = new List<string>();
+            
             int ponteiroDescricao = 0;
             int ponteiroArquivoComprimido;
             int valorHuff = 0;
@@ -32,9 +32,14 @@ namespace YGTool.Compressao
                 {
                     using (BinaryReader leitorDeDescricao = new BinaryReader(descricao))
                     {
+                        string descricaoDescomprimida = "";
+
                         for (int i = 0; i < quantidadeDePonteiros; i++)
                         {
-
+                            if (enderecoDoPonteiro == 0x2594)
+                            {
+                           
+                            }
                             leitorDePonteiro.BaseStream.Seek(enderecoDoPonteiro, SeekOrigin.Begin);
                             ponteiroDescricao = leitorDePonteiro.ReadInt32();
                             ponteiro = ponteiroDescricao;
@@ -67,10 +72,10 @@ namespace YGTool.Compressao
                                 {
                                     valorHuff = posicaoSalvaDentroDaArvore;
                                     leitorCardHuff.BaseStream.Seek(valorHuff + 4, SeekOrigin.Begin);
-                                    short valorDoCaractere = leitorCardHuff.ReadInt16();
-                                    bufferDescompressaoParcial.Add(valorDoCaractere);
+                                    string valorDoCaractere = Encoding.Unicode.GetString(leitorCardHuff.ReadBytes(2));
+                                    descricaoDescomprimida += valorDoCaractere;
 
-                                    if (valorDoCaractere == 0)
+                                    if (valorDoCaractere.Contains("\0"))
                                         break;
 
                                     else
@@ -96,14 +101,15 @@ namespace YGTool.Compressao
 
                             }
 
-                            bufferTotal.AddRange(bufferDescompressaoParcial);
-                            bufferTotal.Add(0x3C);
-                            bufferTotal.Add(0x45);
-                            bufferTotal.Add(0x4E);
-                            bufferTotal.Add(0x44);
-                            bufferTotal.Add(0x3E);
+                         //   descricoes.Add("[Conta:"+i+"]"+descricaoDescomprimida.ToString());
+                            descricoes.Add(descricaoDescomprimida.ToString());
+                           // bufferTotal.Add(0);
+                          //  bufferTotal.Add(0x45);
+                          //  bufferTotal.Add(0x4E);
+                          //  bufferTotal.Add(0x44);
+                          //  bufferTotal.Add(0x3E);
                             enderecoDoPonteiro += 8;
-                            bufferDescompressaoParcial.Clear();
+                            descricaoDescomprimida = "";
 
                         }
 
@@ -112,7 +118,7 @@ namespace YGTool.Compressao
 
 
 
-                return bufferTotal;
+                return descricoes;
 
             }
 
@@ -319,6 +325,16 @@ namespace YGTool.Compressao
         private List<int> ComprimaComTabelaDeCodigosERetornePonteiros(Dictionary<char, string> tabelaDeCodigos, string diretorioCardDesc)
         {
             List<char> caracteresDoArquivo = ObtenhaCaracteresDoArquivo(diretorioCardDesc);
+
+           /* StringBuilder tudaoooo = new StringBuilder(); 
+
+            foreach (var item in caracteresDoArquivo)
+            {
+                tudaoooo.Append(item);
+            }
+
+            File.WriteAllText("_hufcomp.txt", tudaoooo.ToString());*/
+
             StringBuilder fluxoComprimido = new StringBuilder();
 
             fluxoComprimido.Append(",");

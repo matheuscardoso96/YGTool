@@ -1,5 +1,4 @@
-﻿using Microsoft.WindowsAPICodePack.Dialogs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +11,7 @@ using YGTool.Texto;
 using YGTool.Telas;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Text.RegularExpressions;
 
 namespace YGTool
 {
@@ -20,8 +20,43 @@ namespace YGTool
         public TelaPrincipal()
         {
             InitializeComponent();
-            // 0x7002 0x1B11
+           /* string dic = File.ReadAllText(@"C:\Users\T-Gamer\source\repos\YGTool\YGTool\bin\Debug\__card_infos\tag_force_6\cardinfo_jpn\DICT_J.txt").Replace("<PONTEIRO", "~<PONTEIRO");
+            string[] dicSplit = dic.Split('~');
+            List<string> termos = new List<string>();
+            for (int i = 0; i < dicSplit.Length; i++)
+            {
+                if (i == 0)
+                {
+                    continue;
+                }
 
+                if (dicSplit[i].Contains("$"))
+                {
+                    continue;
+                }
+                string termo = Regex.Match(dicSplit[i], "<TEXTO>(.*)<TEXTO§>").Value.Replace("<TEXTO>", "").Replace("<TEXTO§>", "").Replace("<NULL>","");
+                termos.Add(termo);
+
+            }
+            string cardDesc = File.ReadAllText(@"C:\Users\T-Gamer\source\repos\YGTool\YGTool\bin\Debug\__card_infos\tag_force_6\cardinfo_jpn\CARD_Desc_J.txt");
+            List<int> ocorrencias = new List<int>();
+            int conta = 0;
+            foreach (var item in termos)
+            {
+                
+                int qtdValues = Regex.Matches(cardDesc,item).Count;
+                ocorrencias.Add(qtdValues);
+                conta++;
+            }
+
+            List<string> termosEOcorrencias = new List<string>();
+
+            for (int i = 0; i < termos.Count; i++)
+            {
+                termosEOcorrencias.Add(termos[i] + "(" + ocorrencias[i] + ")");
+            }
+
+            File.WriteAllLines("_termos_oco.txt", termosEOcorrencias);*/
         }
 
         private void exportarÚnicoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -58,114 +93,116 @@ namespace YGTool
 
         private void exportarDePastaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+
+                string[] arquivos = Directory.GetFiles(lastSelectedFolder, "*.ehp");
+                bool resultado = false;
+
+                foreach (var diretorioArquivo in arquivos)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
-                    bool resultado = false;
+                    string nomeDoArquivo = Path.GetFileName(diretorioArquivo).Replace(".ehp", "");
+                    string diretorio = Path.GetDirectoryName(diretorioArquivo).Replace(".ehp", "");
+                    Ehp ehp = new Ehp(diretorio, nomeDoArquivo);
+                    resultado = ehp.ExportarArquivo();
+                    
+                }
 
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.ehp");
-                        
+                SalvarUltimoDiretorio(lastSelectedFolder);
 
-                        foreach (var diretorioArquivo in arquivos)
-                        {
-                            string nomeDoArquivo = Path.GetFileName(diretorioArquivo).Replace(".ehp", "");
-                            string diretorio = Path.GetDirectoryName(diretorioArquivo).Replace(".ehp", "");
-                            Ehp ehp = new Ehp(diretorio,nomeDoArquivo);
-                            resultado = ehp.ExportarArquivo();
-                        }
-
-                        if (resultado)
-                        {                            
-                            Mensagem("Ehps exportados com sucesso! ", "Sucesso", MessageBoxIcon.Information);
-                        }
-                    }
+                if (resultado)
+                {
+                    Mensagem("Ehps exportados com sucesso! ", "Sucesso", MessageBoxIcon.Information);
                 }
 
             }
-            catch (Exception ex)
-            {
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+           
+            
+            
         }
 
         private void importarÚnicoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
+
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+
+                string nomeDoArquivo = Path.GetFileName(lastSelectedFolder).Replace(".ehp", "");
+                string diretorio = Path.GetDirectoryName(lastSelectedFolder).Replace(".ehp", "");
+                Ehp ehp = new Ehp(diretorio, nomeDoArquivo);
+                bool resultado = ehp.ImportarArquivo();
+                SalvarUltimoDiretorio(lastSelectedFolder);
+                if (resultado)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
-
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        string nomeDoArquivo = Path.GetFileName(commonOpenFile.FileName).Replace(".ehp", "");
-                        string diretorio = Path.GetDirectoryName(commonOpenFile.FileName).Replace(".ehp", "");
-                        Ehp ehp = new Ehp(diretorio, nomeDoArquivo);                   
-                        bool resultado = ehp.ImportarArquivo();
-                        if (resultado)
-                        {
-                            Mensagem(".ehp importadado com sucesso!", "Sucesso!", MessageBoxIcon.Information);
-                        }
-                    }
+                    Mensagem(".ehp importadado com sucesso!", "Sucesso!", MessageBoxIcon.Information);
                 }
-            }
-            catch (Exception ex)
-            {
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
             }
+
+    
+
+            
+
+
         }
 
         private void importarEmLoteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
+
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                var ehpCompasta = new List<string>();
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+                string[] arquivos = Directory.GetFiles(lastSelectedFolder, "*.ehp");
+                bool resultado = false;
+
+                for (int i = 0; i < arquivos.Length; i++)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
-                    var ehpCompasta = new List<string>();
-
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
+                    if (Directory.Exists(arquivos[i].Replace(".ehp", "")))
                     {
-                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.ehp");
-                        bool resultado = false;
-
-                        for (int i = 0; i < arquivos.Length; i++)
-                        {
-                            if (Directory.Exists(arquivos[i].Replace(".ehp", "")))
-                            {
-                                ehpCompasta.Add(arquivos[i]);
-                            }
-                        }
-
-                        foreach (var diretorioArquivo in ehpCompasta)
-                        {
-                            string nomeDoArquivo = Path.GetFileName(diretorioArquivo).Replace(".ehp", "");
-                            string diretorio = Path.GetDirectoryName(diretorioArquivo).Replace(".ehp", "");
-                            Ehp ehp = new Ehp(diretorio, nomeDoArquivo);
-                            resultado = ehp.ImportarArquivo();
-                        }
-
-                        if (resultado)
-                        {
-                            Mensagem("Ehps importados com sucesso! ", "Sucesso!", MessageBoxIcon.Information);
-                        }
+                        ehpCompasta.Add(arquivos[i]);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                foreach (var diretorioArquivo in ehpCompasta)
+                {
+                    string nomeDoArquivo = Path.GetFileName(diretorioArquivo).Replace(".ehp", "");
+                    string diretorio = Path.GetDirectoryName(diretorioArquivo).Replace(".ehp", "");
+                    Ehp ehp = new Ehp(diretorio, nomeDoArquivo);
+                    resultado = ehp.ImportarArquivo();
+                }
+
+                SalvarUltimoDiretorio(lastSelectedFolder);
+
+                if (resultado)
+                {
+                    Mensagem("Ehps importados com sucesso! ", "Sucesso!", MessageBoxIcon.Information);
+                }
+               
+
             }
+
+
+
+           
         }        
 
 
@@ -202,34 +239,32 @@ namespace YGTool
         {
             string binarioAtual = string.Empty;
 
-            try
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+                TagForceTextos tft = new TagForceTextos();
+
+                string[] arquivos = Directory.GetFiles(lastSelectedFolder, "*.bin");
+
+
+                foreach (var diretorioArquivo in arquivos)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
-
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        TagForceTextos tft = new TagForceTextos();
-                        
-                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.bin");
-
-
-                        foreach (var diretorioArquivo in arquivos)
-                        {
-                            binarioAtual = diretorioArquivo;
-                            tft.ExportarParaTxtPonteirosInternosIndiretos(diretorioArquivo);
-                        }
-                    }
+                    binarioAtual = diretorioArquivo;
+                    tft.ExportarParaTxtPonteirosInternosIndiretos(diretorioArquivo);
                 }
 
+                SalvarUltimoDiretorio(lastSelectedFolder);
+
             }
-            catch (Exception ex)
-            {
-                string nomeArquivo = Path.GetFileName(binarioAtual);
-                MessageBox.Show(this, "Binario: \"" + nomeArquivo + "\" incompatível.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+
+                    
+
+            
         }
 
         private void únicoToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -259,117 +294,191 @@ namespace YGTool
         private void loteeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string binarioAtual = string.Empty;
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
 
-            try
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+                TagForceTextos tft = new TagForceTextos();
+
+                string[] arquivos = Directory.GetFiles(lastSelectedFolder, "*.bin");
+
+
+                foreach (var diretorioArquivo in arquivos)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
-
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        TagForceTextos tft = new TagForceTextos();
-
-                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.bin");
-
-
-                        foreach (var diretorioArquivo in arquivos)
-                        {
-                            binarioAtual = diretorioArquivo;
-                            tft.ExportarParaTxtPonteirosInternosDiretos(diretorioArquivo);
-                        }
-                    }
+                    binarioAtual = diretorioArquivo;
+                    tft.ExportarParaTxtPonteirosInternosDiretos(diretorioArquivo);
                 }
+                SalvarUltimoDiretorio(lastSelectedFolder);
 
-            }
-            catch (Exception ex)
-            {
-                string nomeArquivo = Path.GetFileName(binarioAtual);
-                MessageBox.Show(this, "Binario: \"" + nomeArquivo + "\" incompatível.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            }           
+           
+
+           
         }
 
         private void únicoToolStripMenuItem2_Click(object sender, EventArgs e)
         {
             MessageBox.Show(this, "Selecione os arquivos na seguinte ordem com Ctrl:\n1º Binário da tabela de ponteiros\n2º Binário contendo os textos", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ExportarComPonteirosExternos(true);
 
-            try
-            {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
-                {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.Multiselect = true;
 
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        List<string> arquivos = commonOpenFile.FileNames.ToList();
-                        TagForceTextos tf = new TagForceTextos();
-                        tf.ExportarParaTxtPonteirosExternos(arquivos[1],arquivos[0],4, 0, true);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
+
+        
+
 
         private void únicoToolStripMenuItem3_Click(object sender, EventArgs e)
         {
             MessageBox.Show(this, "Selecione a pasta contendo os arquivos do CardInfo.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            ExportarCartasComDir(lastSelectedFolder, TagForce.TagForce2);
 
-            try
+
+        }
+
+        private void ExportarCartasComDir(string lastSelectedFolder, TagForce tagForce)
+        {
+
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
-                {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+                ExportarCartas(lastSelectedFolder, tagForce);
+                MessageBox.Show(this, "Exportação concluída.", "Informação", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
 
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        TagForceTextos tf = new TagForceTextos();
-                        tf.ExportarCartasParaTxt(commonOpenFile.FileName);
-                    }
+        private void ExportarCartas(string dir, TagForce tagForce)
+        { 
+            TagForceTextos tf = new TagForceTextos();
+            tf.ExportarCartasParaTxt(dir, tagForce);
+            SalvarUltimoDiretorio(dir);
+
+        }
+
+        private void SalvarUltimoDiretorio(string dir)
+        {
+            if (!File.Exists("ygtool.cfg"))
+            {
+                File.Create("ygtool.cfg").Close();
+            }
+
+            List<string> linhas = File.ReadAllLines("ygtool.cfg").ToList();
+            bool existeLinha = false;
+            int index = 0;
+            for (int i = 0; i < linhas.Count; i++)
+            {
+                if (linhas[i].Contains("LastDir="))
+                {
+                    existeLinha = true;
+                    index = i;
+                    break;
                 }
             }
-            catch (Exception ex)
-            {
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            string dirModificar = "LastDir=" + dir;
+
+            if (existeLinha)
+            {               
+                linhas[index] = dirModificar;
+
             }
+            else
+            {
+                linhas.Add(dirModificar);
+            }
+
+            File.WriteAllLines("ygtool.cfg", linhas);
+        }
+
+        private string CarregarUltimoDiretorio()
+        {
+            if (!File.Exists("ygtool.cfg"))
+            {
+                return Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+            }
+            else
+            {
+                List<string> linhas = File.ReadAllLines("ygtool.cfg").ToList();
+
+                for (int i = 0; i < linhas.Count; i++)
+                {
+                    if (linhas[i].Contains("LastDir="))
+                    {
+                        string dirR = linhas[i].Split('=')[1].Replace("\r", "").Replace("\n", "");
+                        if (Directory.Exists(dirR))
+                        {
+                            return dirR;
+                        }
+                        else
+                        {
+                            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                        }
+                        
+                    }
+                }
+
+                return Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            }
+
+            
+           
         }
 
         private void dLGToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "Selecione os arquivos na seguinte ordem com Ctrl:\n1º Binário da tabela de ponteiros\n2º Binário contendo os textos", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            try
-            {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
-                {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.Multiselect = true;
 
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
+            MessageBox.Show(this, "Selecione os arquivos na seguinte ordem com Ctrl:\n1º Binário da tabela de ponteiros\n2º Binário contendo os textos", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ExportarComPonteirosExternos(false);
+
+
+        }
+
+        private void ExportarComPonteirosExternos(bool mutiplica)
+        {
+
+            string tabelaPOnteiros = "";
+            string dirBinario = "";
+
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+
+                openFileDialog.Filter = "Arquivo CardIdx (*.bin)|*.bin|Todos os Arquivos (*.*)|*.*";
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    tabelaPOnteiros = openFileDialog.FileName;
+
+                    using (OpenFileDialog openFileDialog2 = new OpenFileDialog())
                     {
-                        List<string> arquivos = commonOpenFile.FileNames.ToList();
-                        TagForceTextos tf = new TagForceTextos();
-                        tf.ExportarParaTxtPonteirosExternos(arquivos[1], arquivos[0], 4, 0, false);
+
+                        openFileDialog2.Filter = "Arquivo CardName (*.bin)|*.bin|Todos os Arquivos (*.*)|*.*";
+
+                        if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                        {
+                            dirBinario = openFileDialog2.FileName;
+
+                            TagForceTextos tf = new TagForceTextos();
+                            tf.ExportarParaTxtPonteirosExternos(dirBinario, tabelaPOnteiros, 4, 0, mutiplica);
+
+
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void importarTextosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
-            {
+            
                 using (OpenFileDialog openFileDialog = new OpenFileDialog())
                 {
 
@@ -379,15 +488,11 @@ namespace YGTool
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {                       
                         TagForceTextos tf = new TagForceTextos();
-                        tf.ImportarTexto(openFileDialog.FileName);
+                        tf.ImportarTexto(openFileDialog.FileName, false);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            
+            
         }
 
         private void únicoToolStripMenuItem4_Click(object sender, EventArgs e)
@@ -418,39 +523,36 @@ namespace YGTool
 
         private void emLoteDePastaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+                string[] arquivos = Directory.GetFiles(lastSelectedFolder, "*.gim");
+
+
+                foreach (var diretorioArquivo in arquivos)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
+                    Gim gim = new Gim(diretorioArquivo);
+                    Bitmap imagemE = gim.GimParaBmp();
+                    imagemE.Save(diretorioArquivo.Replace(".gim", ".png"), ImageFormat.Png);
+                    imagemE.Dispose();
+                    gim = null;
 
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.gim");
-                       
 
-                        foreach (var diretorioArquivo in arquivos)
-                        {
-                            Gim gim = new Gim(diretorioArquivo);
-                            Bitmap imagemE = gim.GimParaBmp();
-                            imagemE.Save(diretorioArquivo.Replace(".gim", ".png"), ImageFormat.Png);
-                            imagemE.Dispose();
-                            gim = null;
-                            
-                           
-                        }
-
-                        Mensagem("Imagens exportadas com sucesso!" , "Sucesso!", MessageBoxIcon.Information);
-                    }
                 }
 
-            }
-            catch (Exception ex)
-            {
+                Mensagem("Imagens exportadas com sucesso!", "Sucesso!", MessageBoxIcon.Information);
+                SalvarUltimoDiretorio(lastSelectedFolder);
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+   
+
+          
         }
 
         private void únicoToolStripMenuItem5_Click(object sender, EventArgs e)
@@ -594,42 +696,38 @@ namespace YGTool
 
         private void emLoteDePastaToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            try
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+                var arquivos = Directory.GetFiles(lastSelectedFolder, "*.png").ToList();
+                arquivos.AddRange(Directory.GetFiles(lastSelectedFolder, "*.BMP"));
+
+
+                foreach (var diretorioArquivo in arquivos)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
+                    string nomeArquivo = diretorioArquivo.Replace(Path.GetExtension(diretorioArquivo), ".gim");
 
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
+                    if (File.Exists(nomeArquivo))
                     {
-                        var arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.png").ToList();
-                        arquivos.AddRange(Directory.GetFiles(commonOpenFile.FileName, "*.BMP"));
+                        Gim gim = new Gim(nomeArquivo);
+                        gim.BmpParaGim(diretorioArquivo);
 
-
-                        foreach (var diretorioArquivo in arquivos)
-                        {
-                            string nomeArquivo = diretorioArquivo.Replace(Path.GetExtension(diretorioArquivo), ".gim");
-
-                            if (File.Exists(nomeArquivo))
-                            {
-                                Gim gim = new Gim(nomeArquivo);
-                                gim.BmpParaGim(diretorioArquivo);
-                               
-                            }
-
-                        }
-
-                        Mensagem("Imagens importadas com sucesso!", "Sucesso!", MessageBoxIcon.Information);
                     }
+
                 }
 
-            }
-            catch (Exception ex)
-            {
+                Mensagem("Imagens importadas com sucesso!", "Sucesso!", MessageBoxIcon.Information);
+                SalvarUltimoDiretorio(lastSelectedFolder);
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+           
+            
+           
         }
 
         private void ediToolStripMenuItem_Click(object sender, EventArgs e)
@@ -747,68 +845,57 @@ namespace YGTool
 
         private void emLoteToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            try
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+                string[] arquivos = Directory.GetFiles(lastSelectedFolder, "*.gzip");
+
+
+                foreach (var diretorioArquivo in arquivos)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
-
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.gzip");
-
-
-                        foreach (var diretorioArquivo in arquivos)
-                        {
-                            Gzip gz = new Gzip();
-                            gz.Descomprimir(diretorioArquivo);
-                        }
-
-                        Mensagem("Gzips descomprimidos com sucesso! ", "Sucesso", MessageBoxIcon.Information);
-                        
-                    }
+                    Gzip gz = new Gzip();
+                    gz.Descomprimir(diretorioArquivo);
                 }
 
-            }
-            catch (Exception ex)
-            {
+                Mensagem("Gzips descomprimidos com sucesso! ", "Sucesso", MessageBoxIcon.Information);
+                SalvarUltimoDiretorio(lastSelectedFolder);
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+           
+           
         }
 
         private void emLoteToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            try
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+
+                string[] arquivos = Directory.GetFiles(lastSelectedFolder, "*");
+
+
+                foreach (var diretorioArquivo in arquivos)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
-
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.gzip");
-
-
-                        foreach (var diretorioArquivo in arquivos)
-                        {
-                            Gzip gz = new Gzip();
-                            gz.Comprimir(diretorioArquivo);
-                        }
-
-                        Mensagem("Gzips comprimidos com sucesso!", "Sucesso", MessageBoxIcon.Information);
-
-                    }
+                    Gzip gz = new Gzip();
+                    gz.Comprimir(diretorioArquivo);
                 }
 
-            }
-            catch (Exception ex)
-            {
+                Mensagem("Gzips comprimidos com sucesso!", "Sucesso", MessageBoxIcon.Information);
+                SalvarUltimoDiretorio(lastSelectedFolder);
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            
+
         }
 
        
@@ -843,36 +930,29 @@ namespace YGTool
 
         private void loteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
+
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
+
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+                string[] arquivos = Directory.GetFiles(lastSelectedFolder, "*.sp");
+
+
+                foreach (var diretorioArquivo in arquivos)
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
-                    bool resultado = false;
+                    SP sp = new SP();
+                    sp.ExporteAudiosDeDentroDoPacote(diretorioArquivo);
 
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        string[] arquivos = Directory.GetFiles(commonOpenFile.FileName, "*.sp");
-
-
-                        foreach (var diretorioArquivo in arquivos)
-                        {                          
-                            SP sp = new SP();
-                            sp.ExporteAudiosDeDentroDoPacote(diretorioArquivo);
-                            
-                        }
-
-                       
-                    }
                 }
-
+                SalvarUltimoDiretorio(lastSelectedFolder);
             }
-            catch (Exception ex)
-            {
+           
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            
         }
 
         private void importarPacotesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1048,27 +1128,21 @@ namespace YGTool
 
         private void sPRenamerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
-            {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
-                {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            FolderBrowserDialog fbFolderBrowser = new FolderBrowserDialog();
+            fbFolderBrowser.SelectedPath = lastSelectedFolder;
 
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
-                    {
-                        
-                        SP sp = new SP();
-                        sp.SpRenamer(commonOpenFile.FileName);
-                       
-                    }
-                }
-            }
-            catch (Exception ex)
+            if (fbFolderBrowser.ShowDialog() == DialogResult.OK)
             {
+                // Save Last selected folder.
+                lastSelectedFolder = fbFolderBrowser.SelectedPath;
+                SP sp = new SP();
+                sp.SpRenamer(lastSelectedFolder);
+                SalvarUltimoDiretorio(lastSelectedFolder);
 
-                MessageBox.Show(this, ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+          
+           
         }
 
         private void uSAToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1226,6 +1300,38 @@ namespace YGTool
 
 
             }
+        }
+
+        private void cardSortEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Editor_de_Ordem_de_Cartas editor = new Editor_de_Ordem_de_Cartas();
+            editor.Show();
+        }
+
+        private void pastaCardInfoTag4ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cardInfoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+       
+
+        private void pastaCardinfoTag4ToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            MessageBox.Show(this, "Selecione a pasta contendo os arquivos do CardInfo.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            ExportarCartasComDir(lastSelectedFolder, TagForce.TagForce4);
+        }
+
+        private void pastaCardinfoTag6ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(this, "Selecione a pasta contendo os arquivos do CardInfo.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            string lastSelectedFolder = CarregarUltimoDiretorio();
+            ExportarCartasComDir(lastSelectedFolder, TagForce.TagForce6);
         }
     }
 }

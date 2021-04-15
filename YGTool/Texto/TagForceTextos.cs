@@ -79,7 +79,7 @@ namespace YGTool.Texto
 
                     if (ponteiro == bin.Length)
                     {
-                        textos.Add("<" + "PONTEIRO: " + posicaoTabela + "," + somaPonteiro + ">\n" + "<TEXTO>" + textoEmString + "<TEXTO/>\n" + "<FIM/>\n\n");
+                        textos.Add("<" + "PONTEIRO: " + posicaoTabela + "," + somaPonteiro + ">\r\n" + "<TEXTO>" + textoEmString + "<TEXTO/>\n" + "<FIM/>\n\n");
                         break;
                     }
 
@@ -100,7 +100,7 @@ namespace YGTool.Texto
                     byte[] textoEmUnicode = br.ReadBytes(tamanhoTexto);
 
                     textoEmString = Encoding.Unicode.GetString(textoEmUnicode);
-                    textos.Add("<" + "PONTEIRO: " + posicaoTabela + "," + somaPonteiro + ">\n" + "<TEXTO>" + textoEmString.Replace("$CA", "<COR: $CA>").Replace("$C0", "<COR: $C0>").Replace("$C5", "<COR: $C5>").Replace("$C8", "<COR: $C8>").Replace("\n", "<b>\n").Replace("$0", "<JOGADOR: $0>").Replace("\0", "<NULL>") + "<TEXTO/>\n" + "<FIM/>\n\n");
+                    textos.Add("<" + "PONTEIRO: " + posicaoTabela + "," + somaPonteiro + ">\n" + "<TEXTO>" + textoEmString.Replace("$CA", "<COR: $CA>").Replace("$C0", "<COR: $C0>").Replace("$C5", "<COR: $C5>").Replace("$C8", "<COR: $C8>").Replace("$0", "<JOGADOR: $0>").Replace("\0", "<NULL>") + "<TEXTO/>\n" + "<FIM/>\n\n");
                     posicaoTabela += 4;
                     somaPonteiro = 0;
                 }
@@ -114,7 +114,6 @@ namespace YGTool.Texto
         public void ExportarParaTxtPonteirosInternosIndiretosX2(string dirTextoBin)
         {
             int quantidaDePonteiros = 0;
-            int tamanhoDoHeader = 0;
             int tamanhoDaTabela = 0;
             int posicaoTabela = 0;
             int ponteiro = 0;
@@ -237,11 +236,11 @@ namespace YGTool.Texto
 
             if (mutiplica)
             {
-                textos.Add("<Tipo de Ponteiro = ExternosX2 =" + Path.GetFileName(dirIdx) + ">");
+                textos.Add("<Tipo de Ponteiro = ExternosX2 =" + dirIdx + ">");
             }
            else
             {
-                textos.Add("<Tipo de Ponteiro = ExternosX1 =" + Path.GetFileName(dirIdx) + ">");
+                textos.Add("<Tipo de Ponteiro = ExternosX1 =" + dirIdx + ">");
             }
             
 
@@ -295,15 +294,15 @@ namespace YGTool.Texto
 
                     var textoEmString = Encoding.Unicode.GetString(textoEmUnicode);
                     textos.Add("<" + "PONTEIRO: " + posicoesTabela[i] + "," + somaPonteiro + ">\n" + "<TEXTO>" + textoEmString
-                        .Replace("$CA", "<COR: $CA>")
-                        .Replace("$C0", "<COR: $C0>")
-                        .Replace("$C2", "<COR: $C2>")
-                        .Replace("$C3", "<COR: $C3>")
-                        .Replace("$C5", "<COR: $C5>")
-                        .Replace("$C8", "<COR: $C8>")
-                        .Replace("$C9", "<COR: $C9>")
+                        .Replace("$CA", "<COR:$CA>")
+                        .Replace("$C0", "<COR:$C0>")
+                        .Replace("$C2", "<COR:$C2>")
+                        .Replace("$C3", "<COR:$C3>")
+                        .Replace("$C5", "<COR:$C5>")
+                        .Replace("$C8", "<COR:$C8>")
+                        .Replace("$C9", "<COR:$C9>")
                         .Replace("\r", "<r>")
-                        .Replace("\n", "<b>\n").Replace("$0", "<JOGADOR: $0>")
+                        .Replace("\n", "<b>\n").Replace("$0", "<JOGADOR:$0>")
                         .Replace("\0", "<NULL>") + "<TEXTO/>\n" + "<FIM/>\n\n");
                     posicaoTabela += 8;
                     somaPonteiro = 0;
@@ -315,7 +314,7 @@ namespace YGTool.Texto
 
         }
 
-        public void ExportarCartasParaTxt(string dirCard)
+        public void ExportarCartasParaTxt(string dirCard,TagForce tagForce)
         {
             List<string> arquivosNecessariosComprimir = ArquivosNecessarios(dirCard).OrderBy(x => x).ToList();
 
@@ -326,18 +325,30 @@ namespace YGTool.Texto
             string cardName = arquivosNecessariosComprimir[4];                      
             string Dict = arquivosNecessariosComprimir[5];
             List<string> descricaoTexto = new List<string>();
-
+            ExportarParaTxtPonteirosInternosIndiretos(Dict);
             Huffman huff = new Huffman();
-            List<short> descomp = huff.Descomprimir(cardDesc,cardHuff,cardIdx);
+            List<string> descomp = huff.Descomprimir(cardDesc,cardHuff,cardIdx);
+          
             Dicionario conversorDeCodigos = new Dicionario();
-            byte[] descdescomprimida = conversorDeCodigos.TranduzirComDicionario(Dict,cardIdx, descomp, cardIntID,cardName);
-            string[] tex = ConvertaDescricaoParaString(descdescomprimida).Replace("\0", "<NULL>").Split(new[] { "<END>" }, StringSplitOptions.RemoveEmptyEntries);
+          
 
-            File.WriteAllLines("desc.txt",tex);
+
+            byte[] descdescomprimida = new byte[]  { };
+            List<string> tex = conversorDeCodigos.TranduzirComDicionario(Dict, cardIdx, descomp, cardIntID, cardName, tagForce);
+
+            //  File.WriteAllLines("desc.txt",tex);
 
             foreach (var textoo in tex)
             {
-                descricaoTexto.Add("<DESCRICAO>" + textoo + "<DESCRICAO/><FIM/>\n\n");
+                if (textoo.Contains("\0"))
+                {
+                    descricaoTexto.Add("<DESCRICAO>" + textoo.Replace("\0", "<NULL>") + "<DESCRICAO/><FIM/>\n\n");
+                }
+                else
+                {
+                    descricaoTexto.Add("<DESCRICAO>" + textoo + "<NULL>" + "<DESCRICAO/><FIM/>\n\n");
+                }
+                
             }
 
             int quantidaDePonteiros = 0;
@@ -369,35 +380,37 @@ namespace YGTool.Texto
 
             using (BinaryReader br = new BinaryReader(bin))
             {
-                int tamanhoTexto = 0;
+               
 
                 for (int i = 0; i < ponteiros.Count; i++)
                 {
-                    if (ponteiros[i] == bin.Length)
+
+                    if (ponteiros[i] == bin.Length || ponteiros[i] > bin.Length)
                     {
                         break;
                     }
+                    
 
                     br.BaseStream.Seek(ponteiros[i], SeekOrigin.Begin);
-
-                    if (i < ponteiros.Count - 1)
+                    string nomeCarta = "";
+                    while (true)
                     {
-                        tamanhoTexto = ponteiros[i + 1] - ponteiros[i];
+                        string letra = Encoding.Unicode.GetString(br.ReadBytes(2));
+
+                        if (letra.Contains("\0"))
+                        {
+                            nomeCarta += "<NULL>";
+                            break;
+                        }
+
+                        nomeCarta += letra;
+
                     }
-                    else
-                    {
-                        tamanhoTexto = (int)bin.Length - ponteiros[i];
-                    }
 
+                
 
-
-
-                    br.BaseStream.Seek(ponteiros[i], SeekOrigin.Begin);
-
-                    byte[] textoEmUnicode = br.ReadBytes(tamanhoTexto);
-
-                    var textoEmString = Encoding.Unicode.GetString(textoEmUnicode);
-                    textos.Add("<" + "PONTEIRO: " + posicoesTabela[i] + "," + somaPonteiro + ">\n" + "<NOME>" + textoEmString.Replace("$CA", "<COR: $CA>").Replace("$C0", "<COR: $C0>").Replace("$C5", "<COR: $C5>").Replace("$C8", "<COR: $C8>").Replace("\n", "<b>\n").Replace("$0", "<JOGADOR: $0>").Replace("\0", "<NULL>") + "<NOME/>\n");
+                    
+                    textos.Add("<" + "PONTEIRO: " + posicoesTabela[i] + "," + somaPonteiro + ">\n" + "<NOME>" + nomeCarta.Replace("$CA", "<COR: $CA>").Replace("$C0", "<COR: $C0>").Replace("$C5", "<COR: $C5>").Replace("$C8", "<COR: $C8>").Replace("\n", "<b>\n").Replace("$0", "<JOGADOR: $0>").Replace("\0", "<NULL>") + "<NOME/>\n");
                     posicaoTabela += 8;
                     somaPonteiro = 0;
                 }
@@ -408,9 +421,9 @@ namespace YGTool.Texto
 
             List<string> textosCartaFinal = new List<string>();
 
-            textosCartaFinal.Add("<Tipo de Ponteiro = Informação de Cartas = " + Path.GetFileName(cardIdx) + " = " + Path.GetFileName(Dict) + ">");
+            textosCartaFinal.Add("<Tipo de Ponteiro=Informação de Cartas=" + cardIdx + " = " + Dict + ">");
 
-            for (int i = 0; i < descricaoTexto.Count - 1; i++)
+            for (int i = 0; i < textos.Count; i++)
             {
                 textosCartaFinal.Add(textos[i] + descricaoTexto[i]);
             }
@@ -463,7 +476,7 @@ namespace YGTool.Texto
             return textao;
         }
 
-        public void ImportarTexto(string fileName)
+        public void ImportarTexto(string fileName, bool tagoForce4)
         {
             string obterTipoDeTexto = File.ReadAllText(fileName);
 
@@ -490,12 +503,12 @@ namespace YGTool.Texto
             }
             else if (obterTipoDeTexto.Contains("Informação de Cartas"))
             {
-                InsiraInformacoesDeCartas(obterTipoDeTexto, fileName);
+                InsiraInformacoesDeCartas(obterTipoDeTexto, fileName, tagoForce4);
             }
 
         }
 
-        private void InsiraInformacoesDeCartas(string texto, string nomeArquivo)
+        private void InsiraInformacoesDeCartas(string texto, string nomeArquivo, bool tagForce4)
         {
             int tamanhoDoHeader = 0;
             int tamanhoDaTabela = 0;
@@ -508,8 +521,7 @@ namespace YGTool.Texto
             idx = informacoesTabela[1];
             dicte = informacoesTabela[2];
             Dicionario dicionario = new Dicionario();
-            idx = Path.GetDirectoryName(nomeArquivo) + "\\" + idx;
-            dicte = Path.GetDirectoryName(nomeArquivo) + "\\" + dicte;
+           
             Stream bin = new MemoryStream(File.ReadAllBytes(idx));
             Stream backupTabela = new MemoryStream();
             List<byte[]> arquivoEmbytes = new List<byte[]>();
@@ -539,7 +551,11 @@ namespace YGTool.Texto
 
                 foreach (var item in dividirTexto)
                 {
-                    string[] textoSplit = item.Replace("<b>", "\n").Split(new[] { "<NOME>" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] textoSplit;
+                   
+                     textoSplit = item.Replace("<b>", "\r\n").Split(new[] { "<NOME>" }, StringSplitOptions.RemoveEmptyEntries);
+                    
+                    
 
                     int[] infoPoint = ObtenhaInformacaoDoPonteiro(textoSplit[0]);
                     posicaoTabela = infoPoint[0];
@@ -563,8 +579,8 @@ namespace YGTool.Texto
             }
 
             byte[] textoFinalEmByte = new byte[ponteiro];
-
-            string descricaoComdicionario = dicionario.CriarUmDicionario(descricaoDescomprimida.ToString(), dicte);
+            //string descricaoComdicionario =  descricaoDescomprimida.ToString();
+            string descricaoComdicionario = dicionario.ObterTextoDoDicionarioESubstituir( dicte, descricaoDescomprimida.ToString());
 
             MemoryStream textoFinal = new MemoryStream(textoFinalEmByte);
 
@@ -582,10 +598,18 @@ namespace YGTool.Texto
             File.WriteAllBytes(nomeArquivo.Replace(".txt", ".bin").Replace("CARD_Desc", "CARD_Name"), textoFinalEmByte);
 
             File.WriteAllBytes(idx, tabelaNova.ToArray());
-
-            File.WriteAllBytes(nomeArquivo.Replace(".txt", ".bin"), Encoding.Unicode.GetBytes(descricaoComdicionario));
+            byte[] descBytes = Encoding.Unicode.GetBytes(descricaoComdicionario);
+            if (descBytes[0] != 0)
+            {
+              byte[] tmp = new byte[descBytes.Length - 2];
+              Array.Copy(descBytes,2,tmp,0 ,descBytes.Length -2);
+                descBytes = tmp;
+            }
+            File.WriteAllBytes(nomeArquivo.Replace(".txt", ".bin"), descBytes);
 
             Comprima(nomeArquivo.Replace(".txt", ".bin"), nomeArquivo.Replace(".txt", ".bin").Replace("CARD_Desc", "CARD_Huff"), idx);
+
+            ImportarTexto(dicte.Replace(".bin",".txt"), false);
 
         }
 
@@ -607,7 +631,6 @@ namespace YGTool.Texto
                 metade = 1;
             }
 
-            idx = Path.GetDirectoryName(nomeArquivo) + "\\" + idx;
 
             Stream bin = new MemoryStream(File.ReadAllBytes(idx));
 
@@ -634,7 +657,7 @@ namespace YGTool.Texto
 
                 foreach (var item in dividirTexto)
                 {
-                    string[] textoSplit = item.Replace("<b>", "\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] textoSplit = item.Replace("<b>", "\r\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
 
                     int[] infoPoint = ObtenhaInformacaoDoPonteiro(textoSplit[0]);
                     posicaoTabela = infoPoint[0];
@@ -707,7 +730,7 @@ namespace YGTool.Texto
 
                 foreach (var item in dividirTexto)
                 {
-                    string[] textoSplit = item.Replace("<b>", "\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] textoSplit = item.Replace("<b>", "\r\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
 
                     int[] infoPoint = ObtenhaInformacaoDoPonteiro(textoSplit[0]);
                     posicaoTabela = infoPoint[0];
@@ -780,7 +803,7 @@ namespace YGTool.Texto
                 
                foreach (var item in dividirTexto)
                 {                   
-                    string[] textoSplit = item.Replace("<b>", "\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] textoSplit = item.Replace("<b>", "\r\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
 
                     int[] infoPoint = ObtenhaInformacaoDoPonteiro(textoSplit[0]);
                     posicaoTabela = infoPoint[0];
@@ -852,7 +875,7 @@ namespace YGTool.Texto
                 bw.Write((dividirTexto.Length * 4) + 4);
                 foreach (var item in dividirTexto)
                 {
-                    string[] textoSplit = item.Replace("<b>", "\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] textoSplit = item.Replace("<b>", "\r\n").Replace("<TEXTO/>", "").Split(new[] { "<TEXTO>" }, StringSplitOptions.RemoveEmptyEntries);
 
                     int[] infoPoint = ObtenhaInformacaoDoPonteiro(textoSplit[0]);
                     posicaoTabela = infoPoint[0];
@@ -896,9 +919,9 @@ namespace YGTool.Texto
 
         private int[] ObtenhaInformacaoDoPonteiro(string texto)
         {
-            texto = texto.Replace(" ", "").Replace(">","");
+            texto = texto.Replace(" ", "").Replace(">","").Replace("<", "§");
             int[] informacoes = new int[2];
-            string[] inf = texto.Split(':');
+            string[] inf = texto.Split('§').Last().Split(':');
             string[] separaInfo = inf[1].Split(',');
             int posicaoPonteiro = int.Parse(separaInfo[0]);
             int valorASomarPonteiro = int.Parse(separaInfo[1]);

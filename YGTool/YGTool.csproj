@@ -41,12 +41,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CustomMarshalers" />
-    <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.4.0, Culture=neutral, PublicKeyToken=8985beaab7ea3f04, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft-WindowsAPICodePack-Core.1.1.4\lib\net452\Microsoft.WindowsAPICodePack.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.4.0, Culture=neutral, PublicKeyToken=8985beaab7ea3f04, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft-WindowsAPICodePack-Shell.1.1.4\lib\net452\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -95,6 +89,12 @@
     <Compile Include="Imagem\Gim.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Telas\Editor de Ordem de Cartas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Telas\Editor de Ordem de Cartas.Designer.cs">
+      <DependentUpon>Editor de Ordem de Cartas.cs</DependentUpon>
+    </Compile>
     <Compile Include="Telas\EditorDeNomeDeCartas.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -115,6 +115,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Telas\Editor de Ordem de Cartas.resx">
+      <DependentUpon>Editor de Ordem de Cartas.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Telas\EditorDeNomeDeCartas.resx">
       <DependentUpon>EditorDeNomeDeCartas.cs</DependentUpon>

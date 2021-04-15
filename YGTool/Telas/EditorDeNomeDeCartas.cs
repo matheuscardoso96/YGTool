@@ -1,5 +1,4 @@
-﻿using Microsoft.WindowsAPICodePack.Dialogs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -56,14 +55,13 @@ namespace YGTool.Telas
         {
             try
             {
-                using (CommonOpenFileDialog commonOpenFile = new CommonOpenFileDialog())
+                using (FolderBrowserDialog commonOpenFile = new FolderBrowserDialog())
                 {
-                    commonOpenFile.Title = "Selecione uma pasta";
-                    commonOpenFile.IsFolderPicker = true;
+                   
 
-                    if (commonOpenFile.ShowDialog() == CommonFileDialogResult.Ok)
+                    if (commonOpenFile.ShowDialog() == DialogResult.OK)
                     {
-                        Iniciar(commonOpenFile.FileName);
+                        Iniciar(commonOpenFile.SelectedPath);
 
                     }
                 }
